@@ -47,8 +47,8 @@ public:
   Array(const Array& rhs)
     : DynTypeArray(rhs) {}
 
-  Array(const DynTypeArray& rhs)
-    : DynTypeArray(rhs) {}
+//  Array(const DynTypeArray& rhs)
+//    : DynTypeArray(rhs) {}
 
   template <class U, class V>
   Array(const AbstractArrayExpression<U,V>& rhs)

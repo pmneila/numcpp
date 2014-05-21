@@ -132,7 +132,7 @@ inline std::vector<size_t> convertToIndexList(const std::vector<size_t>& list, s
 inline std::vector<size_t> convertToIndexList(const std::vector<int> list, size_t N)
 {
   std::vector<size_t> x;
-  for(int i=0; i<list.size(); i++)
+  for(size_t i=0; i<list.size(); i++)
    x.push_back(list[i]);
   return x;
 }
@@ -147,11 +147,11 @@ inline std::vector<size_t> convertToIndexList(Slice& sl, size_t N)
     std::vector<size_t> indices;
 
     size_t i = sl.start;
-
+    
     if(sl.end < 0)
       sl.end += N+1;
 
-    while(i < sl.end)
+    while(i < static_cast<size_t>(sl.end))
     {
         indices.push_back(i);
         i += sl.step;

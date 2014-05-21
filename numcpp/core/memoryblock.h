@@ -14,7 +14,7 @@ public:
   virtual void setCachingEnabled(bool caching) = 0;
 };
 
-static AbstractGlobalData& GetGlobalData();
+AbstractGlobalData& GetGlobalData();
 
 class MemoryBlock
 {

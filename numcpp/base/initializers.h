@@ -76,10 +76,10 @@ public:
   }
 
 protected:
-  std::vector<size_t> shape_;
   T start_;
   T end_;
   T step_;
+  std::vector<size_t> shape_;
 };
 
 

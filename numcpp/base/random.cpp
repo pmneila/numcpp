@@ -99,7 +99,7 @@ template<class T>
 Array<T>& internal_shuffle_(Array<T>& x)
 {
   // obtain a time-based seed:
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  //unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::random_shuffle ((T*)x.data(),((T*)x.data())+x.size() );
   return x;
 }
@@ -107,6 +107,7 @@ Array<T>& internal_shuffle_(Array<T>& x)
 DynTypeArray& shuffle_(DynTypeArray& x)
 {
   CALL_TEMPLATE_FUNC_ALL_TYPES(return internal_shuffle_,x)
+  return x;
 }
 
 DynTypeArray shuffle(const DynTypeArray& x)

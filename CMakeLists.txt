@@ -1,4 +1,4 @@
-project (NUMCPP CXX)
+project(numcpp)
 
 cmake_minimum_required(VERSION 2.8)
 

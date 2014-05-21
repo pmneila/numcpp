@@ -25,10 +25,10 @@ size_t flatIndex(const std::vector<size_t>& index, const std::vector<size_t>& st
   return offset;
 }
 
-void copyShapeToSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis)
+void copyShapeToSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, unsigned int axis)
 {
   int j=0;
-  for(int i=0; i<shapeIn.size(); i++)
+  for(size_t i=0; i<shapeIn.size(); i++)
     if(i != axis)
     {
       shapeOut[j] = shapeIn[i];
@@ -36,10 +36,10 @@ void copyShapeToSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>
     }
 }
 
-void copyShapeFromSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis)
+void copyShapeFromSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, unsigned int axis)
 {
   int j=0;
-  for(int i=0; i<shapeOut.size(); i++)
+  for(size_t i=0; i<shapeOut.size(); i++)
     if(i != axis)
     {
       shapeOut[i] = shapeIn[j];

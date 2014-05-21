@@ -8,9 +8,9 @@ class Iterator
 {
 public:
   Iterator(std::vector<size_t> shape)
-    : shape(shape)
-    , D(shape.size())
+    : D(shape.size())
     , counter(D)
+    , shape(shape)
   {
     for(int i=0; i<D; i++)
       counter[i] = 0;

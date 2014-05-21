@@ -32,7 +32,7 @@ public:
   static GlobalData& GetInstance();
 };
 
-static AbstractGlobalData& GetGlobalData()
+AbstractGlobalData& GetGlobalData()
 {
    static GlobalData instance;
    return instance;
