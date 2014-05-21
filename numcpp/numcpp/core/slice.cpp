@@ -18,6 +18,14 @@ Slice::Slice(ptrdiff_t start, ptrdiff_t end, ptrdiff_t step)
 {
 }
 
+Slice::Slice(int index)
+    : start(index)
+    , end(index+1)
+    , step(0)
+{
+    
+}
+
 Slice::Slice(ptrdiff_t index)
     : start(index)
     , end(index+1)

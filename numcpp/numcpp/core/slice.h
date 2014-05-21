@@ -15,6 +15,7 @@ struct Slice
 {
   Slice();
   Slice(ptrdiff_t start, ptrdiff_t end, ptrdiff_t step = 1);
+  Slice(int index);
   Slice(ptrdiff_t index);
   Slice(size_t index);
   Slice(const Slice& slice);
