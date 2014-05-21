@@ -1,6 +1,9 @@
 #include "solver.h"
 #include "lapack.h"
 
+#include "../core.h"
+#include "../expressions.h"
+
 namespace numcpp
 {
 

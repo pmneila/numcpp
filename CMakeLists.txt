@@ -2,10 +2,9 @@ project (NUMCPP CXX)
 
 cmake_minimum_required(VERSION 2.8)
 
-SET(NUMCPP_LIBS fftw3 fftw3f m blas lapack hdf5 cairo numcpp)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -O3 -msse2  -ffast-math -fomit-frame-pointer -fPIC -fstrict-aliasing -march=core2 -mtune=core2" ) # -fopenmp -ftree-vectorizer-verbose=5
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall" )
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g" )
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -msse2 -ffast-math -fomit-frame-pointer -fPIC -fstrict-aliasing -march=core2 -mtune=core2" ) # -fopenmp -ftree-vectorizer-verbose=5
 
 #INCLUDE (CheckIncludeFiles)
 # usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )
@@ -19,8 +18,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #  target_link_libraries (helloworld ${BZIP2_LIBRARIES})
 #endif (CLAPACK_FOUND)
 
-
 add_subdirectory (numcpp)
-add_subdirectory (examples)
-add_subdirectory (tests)
+# add_subdirectory (examples)
+# add_subdirectory (tests)
 # add_subdirectory (performance)
