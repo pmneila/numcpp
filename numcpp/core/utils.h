@@ -20,10 +20,10 @@ template<class Array>
 typename Array::value_type prod(Array x)
 {
   auto prod = x[0];
-
+  
   for(size_t i=1; i<x.size(); i++)
     prod *= x[i];
-
+  
   return prod;
 }
 

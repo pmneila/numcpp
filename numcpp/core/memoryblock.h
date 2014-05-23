@@ -44,8 +44,6 @@ private:
   bool ownData = false;
 };
 
-
-
 inline void EnableCaching()
 {
   MemoryBlock::EnableCaching();

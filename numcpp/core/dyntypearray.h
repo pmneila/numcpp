@@ -71,11 +71,6 @@ protected:
 
 /*! @} */
 
-
 }
-
-
-
-
 
 #endif
