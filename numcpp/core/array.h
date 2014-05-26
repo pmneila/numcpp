@@ -1,7 +1,7 @@
 #ifndef NUMCPP_ARRAY_H
 #define NUMCPP_ARRAY_H
 
-#include "dyntypearray.h"
+#include "arraycore.h"
 #include "abstractexpression.h"
 #include "slice.h"
 
@@ -11,14 +11,10 @@ namespace numcpp
 {
 
 
-template<class T>
-class Array : public DynTypeArray,
-                    public AbstractArrayExpression<T,Array<T> >
+template<class Derived>
+class Array : public AbstractArrayExpression<T,Array<T> >
 {
 public:
-  using DynTypeArray::size;
-  using DynTypeArray::shape;
-
   Array()
     : DynTypeArray(dtype<T>(), sizeof(T)) {}
 
