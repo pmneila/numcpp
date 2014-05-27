@@ -14,16 +14,17 @@ class ArrayCore
 {
 public:
     
+    ArrayCore()
+    {}
+    
     ArrayCore(const std::vector<size_t>& shape,
         const std::vector<std::ptrdiff_t> strides,
         const Manager::Ptr manager,
-        void* data,
         std::ptrdiff_t offset=0)
         : _shape(shape)
         , _strides(strides)
         , _offset(offset)
         , _manager(manager)
-        , _data(data)
     {
         if(_shape.size() != _strides.size())
             throw std::invalid_argument("strides and shape must have the same size");
@@ -46,7 +47,6 @@ public:
         , _strides(other._strides)
         , _offset(other._offset)
         , _manager(other._manager)
-        , _data(other._data)
     {}
     
     ArrayCore& operator=(const ArrayCore& other)
@@ -55,7 +55,6 @@ public:
         _strides = other._strides;
         _offset = other._offset;
         _manager = other._manager;
-        _data = other._data;
         return *this;
     }
     
@@ -66,14 +65,13 @@ public:
     
     Manager::Ptr getManager() const {return _manager;}
     
-    void* data() {return _data;}
+    void* data() const {return _manager->data();}
     
 protected:
     std::vector<size_t> _shape;
     std::vector<std::ptrdiff_t> _strides;
     std::ptrdiff_t _offset;
     Manager::Ptr _manager;
-    void* _data;
 };
 
 }

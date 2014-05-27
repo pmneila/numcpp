@@ -7,7 +7,7 @@
 namespace numcpp
 {
 
-template<class T>
+/*template<class T>
 Array<T>& sort_(Array<T>& x);
 
 DynTypeArray& sort_(DynTypeArray& x);
@@ -33,7 +33,7 @@ Array<size_t> argsort(const Array<T>& x)
     [&x](size_t i1, size_t i2) {return x[i1] < x[i2];});
 
   return idx;
-}
+}*/
 
 }
 

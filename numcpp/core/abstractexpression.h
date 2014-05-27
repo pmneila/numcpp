@@ -33,15 +33,15 @@ public:
     return getSelf().shape();
   }
 
-  T& operator[](size_t index)
-  {
-    return getSelf()[index];
-  }
+  // T& operator[](size_t index)
+  // {
+  //   return getSelf()[index];
+  // }
 
-  T operator[](size_t index) const
-  {
-    return getSelf()[index];
-  }
+  // T operator[](size_t index) const
+  // {
+  //   return getSelf()[index];
+  // }
 
 protected:
   Derived & getSelf() { return *static_cast<Derived *>(this); }
