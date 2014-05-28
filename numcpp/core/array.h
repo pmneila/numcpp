@@ -26,6 +26,14 @@ public:
     Array(const ArrayCore& core)
         : Super(core)
     {}
+    
+    Array& operator=(const Array& rhs)
+    {
+        this->_data = rhs._data;
+        this->_core = rhs._core;
+        
+        return *this;
+    }
 };
 
 }

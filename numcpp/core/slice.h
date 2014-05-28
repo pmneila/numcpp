@@ -33,8 +33,6 @@ const Slice full = { 0, -1, 1 };
 using slice = Slice;
 using S = Slice;
 
-
-
 std::vector<Slice> convertToSliceArray(std::initializer_list<Slice> slices);
 
 // count ints
