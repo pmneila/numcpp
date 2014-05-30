@@ -15,20 +15,21 @@ struct Slice
 {
   Slice();
   Slice(ptrdiff_t start, ptrdiff_t end, ptrdiff_t step = 1);
-  Slice(int index);
-  Slice(ptrdiff_t index);
-  Slice(size_t index);
+  explicit Slice(int index);
+  // Slice(ptrdiff_t index);
+  // Slice(size_t index);
   Slice(const Slice& slice);
+  
   template<class T>
   Slice(std::initializer_list<T> list);
-
+  
   ptrdiff_t start;
   ptrdiff_t end;
   ptrdiff_t step;
 };
 
 //const long end = -1;
-const Slice full = { 0, -1, 1 };
+const Slice full = { 0, 0, 1 };
 
 using slice = Slice;
 using S = Slice;

@@ -6,7 +6,7 @@
 
 #include "arraycore.h"
 #include "abstractexpression.h"
-#include "slice.h"
+#include "index.h"
 
 namespace numcpp
 {
@@ -40,35 +40,39 @@ protected:
         return *reinterpret_cast<T*>(data[offset]);
     }
     
-    Array<T> operator[](std::vector<Slice>& slices)
+    Array<T> operator[](std::vector<Index>& index)
     {
-        std::ptrdiff_t newOffset;
+        std::ptrdiff_t newOffset = _core.offset();
         
         int ndims = this->ndims();
         
-        Strides newStrides(_core.strides().size());
-        Shape newShape(_core.shape().size());
+        if(index.size() > ndims)
+            throw std::invalid_argument("the index has more elements than array dimensions");
         
-        if(slices.size() > ndims)
-            throw std::invalid_argument("more slices than array dimensions");
+        if(index.size() < ndims)
+            index.resize(ndims, full);
         
-        if(slices.size() < ndims)
-            slices.resize(ndims, full);
+        Strides newStrides();
+        Shape newShape();
         
-        std::vector<std::ptrdiff_t> starts(slices.size());
-        //std::vector<std::ptrdiff_t> ends(slices.size());
-        
-        // std::transform(slices.begin(), slices.end(), starts.begin(),
-        //    [&ndims](const Slice& v) {return v.start >= 0 ? v.start : ndims + v.start;});
-        
-        auto starts_it = starts.begin();
-        auto newStrides_it = newStrides.begin();
-        
-        for(auto slices_it = slices.begin(); slices_it != slices.end();
-            ++slices_it)
+        auto shape_it = shape().begin();
+        auto strides_it = strides().begin();
+        for(auto index_it = index.begin(); index_it != index.end();
+            ++index_it, ++shape_it, ++strides_it)
         {
+            int start = index_it->start();
+            int end = index_it->end();
+            int step = index_it->step();
             
+            if(!index_it->isSingleton())
+            {
+                
+            }
+            
+            newOffset += start * *strides_it;
         }
+        
+        return Array<T>(ArrayCore(newShape, newStrides, manager(), newOffset));
     }
     
 public:
@@ -76,6 +80,8 @@ public:
     const Shape& shape() const {return _core.shape();}
     const Strides& strides() const {return _core.strides();}
     int ndims() const {return _core.ndims();}
+    Manager::Ptr manager() const {return _core.manager();}
+    
     T* data() const {return _data;}
 };
 

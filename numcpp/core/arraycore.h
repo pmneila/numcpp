@@ -55,7 +55,7 @@ public:
     const Strides& strides() const {return _strides;}
     int ndims() const {return _shape.size();}
     
-    Manager::Ptr getManager() const {return _manager;}
+    Manager::Ptr manager() const {return _manager;}
     
     void* data() const {return _manager->data();}
     
