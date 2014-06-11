@@ -37,7 +37,7 @@ protected:
     T& operator[](const std::vector<size_t>& index)
     {
         std::ptrdiff_t offset = _core.offset(index);
-        return *reinterpret_cast<T*>(data[offset]);
+        return *reinterpret_cast<T*>(_data[offset]);
     }
     
     Array<T> operator[](std::vector<Index>& index)
@@ -52,21 +52,34 @@ protected:
         if(index.size() < ndims)
             index.resize(ndims, full);
         
-        Strides newStrides();
-        Shape newShape();
+        Strides newStrides;
+        Shape newShape;
         
         auto shape_it = shape().begin();
         auto strides_it = strides().begin();
         for(auto index_it = index.begin(); index_it != index.end();
             ++index_it, ++shape_it, ++strides_it)
         {
-            int start = index_it->start();
-            int end = index_it->end();
-            int step = index_it->step();
+            int start;
             
             if(!index_it->isSingleton())
             {
+                int index = index_it->index();
+                start = index;
+            }
+            else
+            {
+                const Slice& slice = index_it->slice();
+                start = slice.start(*shape_it);
+                int end = slice.end(*shape_it);
+                int step = slice.step();
                 
+                if(step > 0)
+                    newShape.push_back(ceil_div(end - start, step));
+                else
+                    newShape.push_back(ceil_div(start - end, -step));
+                
+                newStrides.push_back(step * *strides_it);
             }
             
             newOffset += start * *strides_it;

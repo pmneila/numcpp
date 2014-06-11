@@ -73,8 +73,25 @@ Check whether the array x has the dimension dim.
 */
 void checkDim(const DynTypeArray& x, int dim);
 
+std::ostream& operator<<(std::ostream& os, const SliceElem& elem)
+{
+    if(elem.isNone())
+        os << "()";
+    else
+        os << elem.value();
+    
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Slice& slice)
+{
+    os << "S{" << slice.start() << ", " << slice.end() << ", " << slice.step() << "}";
+    
+    return os;
+}
+
 /*! 
-Ostream operater for Array
+Ostream operator for Array
 */
 template<class T>
 std::ostream& operator<< (std::ostream& os, const Array<T>& x)

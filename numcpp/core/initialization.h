@@ -31,7 +31,7 @@ inline std::vector<std::ptrdiff_t> contiguousStrides(const std::vector<size_t>& 
 }
 
 template<typename T>
-Array<T> empty(const std::vector<size_t>& shape)
+Array<T> empty(const Shape& shape)
 {
     size_t numElements = prod(shape);
     size_t size = numElements * sizeof(T);

@@ -52,6 +52,13 @@ std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
   return os;
 }
 
+// Ceil of the integer division a/b
+template<typename T>
+T ceil_div(const T& a, const T& b)
+{
+    return (a - 1)/b + 1;
+}
+
 void copyShapeToSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis);
 
 void copyShapeFromSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis);
