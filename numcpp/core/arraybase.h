@@ -34,10 +34,11 @@ protected:
         _core = rhs._core;
     }
     
+public:
     T& operator[](const std::vector<size_t>& index)
     {
         std::ptrdiff_t offset = _core.offset(index);
-        return *reinterpret_cast<T*>(_data[offset]);
+        return *reinterpret_cast<T*>(_data + offset);
     }
     
     Array<T> operator[](std::vector<Index>& index)

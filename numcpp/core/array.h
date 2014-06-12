@@ -1,9 +1,8 @@
+
 #ifndef NUMCPP_ARRAY_H
 #define NUMCPP_ARRAY_H
 
 #include "arraybase.h"
-
-#include <array>
 
 namespace numcpp
 {

@@ -15,7 +15,7 @@ public:
     
     Manager(const Manager&) = delete;
     
-    virtual void* data() const = 0;
+    virtual unsigned char* data() const = 0;
     
 protected:
     explicit Manager() {}
@@ -39,7 +39,7 @@ public:
         return r;
     }
     
-    virtual void* data() const {return _array.get();}    
+    virtual unsigned char* data() const {return _array.get();}    
 };
 
 }

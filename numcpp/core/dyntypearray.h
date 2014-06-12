@@ -7,7 +7,7 @@
 
 #include <vector>
 
-extern template class std::vector<size_t>;
+// extern template class std::vector<size_t>;
 
 namespace numcpp
 {
