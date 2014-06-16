@@ -11,6 +11,8 @@
 namespace numcpp
 {
 
+template<typename T> class Iterator;
+
 template <typename T, typename Derived>
 class ArrayBase : public AbstractArrayExpression<T, Derived>
 {
@@ -35,6 +37,9 @@ protected:
     }
     
 public:
+    typedef Iterator<T> iterator;
+    typedef Iterator<const T> const_iterator;
+    
     T& operator[](const std::vector<size_t>& index)
     {
         std::ptrdiff_t offset = _core.offset(index);
@@ -89,6 +94,9 @@ public:
         return Array<T>(ArrayCore(newShape, newStrides, manager(), newOffset));
     }
     
+    iterator begin();
+    iterator end();
+    
 public:
     int numElements() const {return _core.numElements();}
     const Shape& shape() const {return _core.shape();}
@@ -96,8 +104,31 @@ public:
     int ndims() const {return _core.ndims();}
     Manager::Ptr manager() const {return _core.manager();}
     
-    T* data() const {return _data;}
+    T* data() const {return reinterpret_cast<T*>(_data);}
+    ArrayCore& core() {return _core;}
+    const ArrayCore& core() const {return _core;}
 };
+
+}
+
+#include "iterator.h"
+
+namespace numcpp
+{
+
+template <typename T, typename Derived>
+typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::begin()
+{
+    return iterator(*this);
+}
+
+template <typename T, typename Derived>
+typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::end()
+{
+    iterator it(*this);
+    it.goToEnd();
+    return it;
+}
 
 }
 

@@ -16,12 +16,15 @@ namespace numcpp
 @{
 */
 
+typedef std::vector<size_t> Shape;
+typedef std::vector<std::ptrdiff_t> Strides;
+
 template<class Array>
 typename Array::value_type prod(Array x)
 {
-  auto prod = x[0];
+  int prod = 1;
   
-  for(size_t i=1; i<x.size(); i++)
+  for(size_t i=0; i<x.size(); i++)
     prod *= x[i];
   
   return prod;
@@ -34,9 +37,25 @@ Array removeOnes(Array x)
   return x;
 }*/
 
-std::vector<size_t> multiIndex(const size_t& index, const std::vector<size_t>& shape);
+std::vector<size_t> multiIndex(const size_t& index, const Shape& shape);
 
-size_t flatIndex(const std::vector<size_t>& index, const std::vector<size_t>& strides, size_t offset);
+size_t flatIndex(const std::vector<size_t>& index, const Strides& strides, size_t offset);
+
+// Sequential strides.
+Strides seqStrides(const Shape& shape, const Strides& strides)
+{
+    Strides prod(strides.size(), 0);
+    Strides res(strides);
+    // std::transform(shape.begin(), shape.end(), strides.begin(), prod.begin(),
+    //     [](const Shape::value_type& v1, const Strides::value_type& v2) -> Strides::value_type {return v1*v2;});
+    std::transform(shape.begin(), shape.end(), strides.begin(), prod.begin(),
+        std::multiplies<Strides::value_type>());
+    
+    std::transform(res.begin(), res.end()-1, prod.begin()+1, res.begin(),
+        std::minus<Strides::value_type>());
+    
+    return res;
+}
 
 template<class T>
 void print(const T& x)

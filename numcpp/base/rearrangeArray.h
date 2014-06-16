@@ -145,7 +145,7 @@ Array<T> reverse(const Array<T>& x)
 /*!
 Reverse the elements of an array x along axis \a d (inplace).
 */
-template<class T>
+/*template<class T>
 Array<T>& flipdim_(Array<T>& x, size_t axis)
 {
   T tmp;
@@ -175,7 +175,7 @@ Array<T>& flipdim_(Array<T>& x, size_t axis)
   }
 
   return x;
-}
+}*/
 
 /*!
 Reverse the elements of an array x along axis \a d.

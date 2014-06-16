@@ -40,7 +40,7 @@ Array<T> sum(const Array<T>& x, Int axis) // TODO AbstractArray
 {
   //  static_assert(D > 1, "sum(x,axis) is only supported for array of dimension D>1!");
 
-  std::vector<size_t> shape_(x.ndims()-1);
+  /*std::vector<size_t> shape_(x.ndims()-1);
 
   copyShapeToSubArray(x.shape(), shape_, axis);
 
@@ -60,7 +60,7 @@ Array<T> sum(const Array<T>& x, Int axis) // TODO AbstractArray
     }
   }
 
-  return y;
+  return y;*/
 }
 
 /*template<class T>

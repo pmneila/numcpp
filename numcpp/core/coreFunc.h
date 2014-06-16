@@ -90,6 +90,15 @@ std::ostream& operator<<(std::ostream& os, const Slice& slice)
     return os;
 }
 
+std::ostream& operator<< (std::ostream& os, const Shape& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << " ";
+    os << ")";
+    return os;
+}
+
 /*! 
 Ostream operator for Array
 */

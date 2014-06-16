@@ -35,7 +35,6 @@ Array<T> empty(const Shape& shape)
 {
     size_t numElements = prod(shape);
     size_t size = numElements * sizeof(T);
-    std::cout << size << std::endl;
     Manager::Ptr manager = SimpleManager::allocate(size);
     auto strides = contiguousStrides(shape, sizeof(T));
     

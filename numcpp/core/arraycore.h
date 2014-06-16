@@ -11,9 +11,6 @@
 namespace numcpp
 {
 
-typedef std::vector<size_t> Shape;
-typedef std::vector<std::ptrdiff_t> Strides;
-
 class ArrayCore
 {
 public:
@@ -57,7 +54,7 @@ public:
     
     Manager::Ptr manager() const {return _manager;}
     
-    void* data() const {return _manager->data();}
+    unsigned char* data() const {return _manager->data();}
     
     std::ptrdiff_t offset() const {return _offset;}
     
