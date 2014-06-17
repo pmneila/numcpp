@@ -1,7 +1,5 @@
 #include "dyntypearray.h"
 
-template class std::vector<size_t>;
-
 namespace numcpp
 {
 

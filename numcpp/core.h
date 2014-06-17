@@ -7,6 +7,7 @@
 #include "core/coreFunc.h"
 #include "core/constants.h"
 #include "core/iterator.h"
+#include "core/itertools.h"
 
 /*!
 @defgroup core Core

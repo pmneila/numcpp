@@ -97,7 +97,6 @@ public:
     iterator begin();
     iterator end();
     
-public:
     int numElements() const {return _core.numElements();}
     const Shape& shape() const {return _core.shape();}
     const Strides& strides() const {return _core.strides();}
@@ -105,6 +104,8 @@ public:
     Manager::Ptr manager() const {return _core.manager();}
     
     T* data() const {return reinterpret_cast<T*>(_data);}
+    std::ptrdiff_t offset() const {return _core.offset();}
+    
     ArrayCore& core() {return _core;}
     const ArrayCore& core() const {return _core;}
 };

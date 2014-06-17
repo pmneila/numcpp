@@ -10,12 +10,25 @@ namespace numcpp
 template<typename T>
 class Iterator
 {
+private:
+    unsigned char* pointer_end() const
+    {
+        Shape end_counter(_core.ndims());
+        const Shape& shape = _core.shape();
+        
+        std::transform(shape.begin(), shape.end(), end_counter.begin(),
+            [](Shape::value_type v) -> Shape::value_type {return v - 1;});
+        
+        return _core.data() + _core.offset(end_counter) + _seq_strides.back();
+    }
+    
 protected:
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
         : _core(array.core())
         , _seq_strides(seqStrides(_core.shape(), _core.strides()))
         , _counter(_core.ndims(), 0)
+        , _pointer_end(nullptr)
         , _pointer(reinterpret_cast<unsigned char*>(_core.data() + _core.offset()))
     {}
     
@@ -26,6 +39,7 @@ public:
     Iterator(const Iterator& rhs)
         : _core(rhs._core)
         , _counter(rhs._counter)
+        , _pointer_end(rhs._pointer_end)
         , _pointer(rhs._pointer)
     {}
     
@@ -34,11 +48,13 @@ public:
         _core = rhs._core;
         _counter = rhs._counter;
         _pointer = rhs._pointer;
+        _pointer_end = rhs._pointer_end;
     }
     
     Iterator& operator++()
     {
-        for(int i=_core.ndims()-1; i>=0; --i)
+        int i;
+        for(i=_core.ndims()-1; i>=0; --i)
         {
             _pointer += _seq_strides[i];
             if(_counter[i] < _core.shape()[i] - 1)
@@ -49,6 +65,9 @@ public:
             else
                 _counter[i] = 0;
         }
+        
+        if(i==-1)
+            _pointer = _pointer_end;
         
         return *this;
     }
@@ -76,7 +95,7 @@ public:
     
     void goToEnd()
     {
-        _pointer = _core.data() + _core.offset(_core.shape());
+        _pointer = _pointer_end;
     }
     
     const Shape& counter() const {return _counter;}
@@ -87,6 +106,7 @@ private:
     const ArrayCore& _core;
     Strides _seq_strides;
     Shape _counter;
+    unsigned char* const _pointer_end;
     unsigned char* _pointer;
 };
 

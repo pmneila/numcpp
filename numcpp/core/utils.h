@@ -63,13 +63,13 @@ void print(const T& x)
   std::cout << x << std::endl;
 }
 
-template<class T>
-std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
-{
-  for(auto& y: x)
-    os << y << " ";
-  return os;
-}
+// template<class T>
+// std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
+// {
+//   for(auto& y: x)
+//     os << y << " ";
+//   return os;
+// }
 
 // Ceil of the integer division a/b
 template<typename T>
