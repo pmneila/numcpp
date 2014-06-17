@@ -22,10 +22,6 @@ public:
     int index() const {return _index;}
     const Slice& slice() const {return _slice;}
     
-    // int start() const {return _tag == INT ? _index : _slice.start;}
-    // int end() const {return _tag == INT ? _index+1 : _slice.end;}
-    // int step() const {return _tag == INT ? 1 : _slice.step;}
-    
 protected:
     enum {INT, SLICE} _tag;
     //union

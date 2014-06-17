@@ -176,15 +176,13 @@ public:
         : _iterables(t)
     {}
     
-    template<typename... Iterators>
-    ZipIterator<Iterators...> begin()
+    ZipIterator<typename Iterables::iterator...> begin()
     {
         auto aux = detail::for_each_in_tuple(_iterables, detail::begin_functor());
         return ZipIterator<typename Iterables::iterator...>(aux);
     }
     
-    template<typename... Iterators>
-    ZipIterator<Iterators...> end()
+    ZipIterator<typename Iterables::iterator...> end()
     {
         auto aux = detail::for_each_in_tuple(_iterables, detail::end_functor());
         return ZipIterator<typename Iterables::iterator...>(aux);

@@ -11,6 +11,8 @@
 namespace numcpp
 {
 
+template<class T> class Array;
+template<class T> class ArrayRef;
 template<typename T> class Iterator;
 
 template <typename T, typename Derived>
@@ -37,6 +39,11 @@ protected:
     }
     
 public:
+    typedef T value_type;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T* pointer;
+    typedef const T* const_pointer;
     typedef Iterator<T> iterator;
     typedef Iterator<const T> const_iterator;
     
@@ -46,7 +53,7 @@ public:
         return *reinterpret_cast<T*>(_data + offset);
     }
     
-    Array<T> operator[](std::vector<Index>& index)
+    ArrayRef<T> operator[](std::vector<Index>& index)
     {
         std::ptrdiff_t newOffset = _core.offset();
         
@@ -68,7 +75,7 @@ public:
         {
             int start;
             
-            if(!index_it->isSingleton())
+            if(index_it->isSingleton())
             {
                 int index = index_it->index();
                 start = index;
@@ -91,7 +98,7 @@ public:
             newOffset += start * *strides_it;
         }
         
-        return Array<T>(ArrayCore(newShape, newStrides, manager(), newOffset));
+        return ArrayRef<T>(ArrayCore(newShape, newStrides, manager(), newOffset));
     }
     
     iterator begin();

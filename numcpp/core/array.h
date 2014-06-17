@@ -3,6 +3,7 @@
 #define NUMCPP_ARRAY_H
 
 #include "arraybase.h"
+#include "arrayref.h"
 
 namespace numcpp
 {
@@ -21,6 +22,10 @@ public:
         : Super(rhs._core)
     {}
     
+    Array(const ArrayRef<T>& array)
+        : Super(array.core())
+    {}
+    
     Array(const ArrayCore& core)
         : Super(core)
     {}
@@ -31,6 +36,11 @@ public:
         this->_core = rhs._core;
         
         return *this;
+    }
+    
+    ArrayRef<T> deep()
+    {
+        return ArrayRef<T>(this->core());
     }
 };
 

@@ -36,6 +36,12 @@ protected:
     friend class ArrayBase;
     
 public:
+    typedef T value_type;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    
     Iterator(const Iterator& rhs)
         : _core(rhs._core)
         , _counter(rhs._counter)

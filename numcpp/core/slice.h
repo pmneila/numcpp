@@ -108,7 +108,7 @@ public:
         if(_end.isUnit())
         {
             if(_step >= 0)
-                return shape - 1;
+                return shape;
             
             return -1;
         }

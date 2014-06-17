@@ -47,6 +47,9 @@ Array<T> empty(const Shape& shape)
 template<typename T>
 Array<T> broadcast(const Array<T>& array, const Shape& newShape)
 {
+    if(array.shape() == newShape)
+        return array;
+    
     int newndims = newShape.size();
     Strides newStrides(newndims);
     Strides oldStrides(newndims);

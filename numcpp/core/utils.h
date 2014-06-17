@@ -30,16 +30,38 @@ typename Array::value_type prod(Array x)
   return prod;
 }
 
-/*template<class Array>
-Array removeOnes(Array x)
-{
-  x.erase(std::remove(x.begin(), x.end(), 1), x.end());
-  return x;
-}*/
-
 std::vector<size_t> multiIndex(const size_t& index, const Shape& shape);
 
 size_t flatIndex(const std::vector<size_t>& index, const Strides& strides, size_t offset);
+
+Shape broadcastedShape(const Shape& shape1, const Shape& shape2)
+{
+    int ndim = std::max(shape1.size(), shape2.size());
+    
+    Shape res(ndim);
+    Shape extshape1(ndim, 1);
+    Shape extshape2(ndim, 1);
+    
+    std::copy(shape1.rbegin(), shape1.rend(), extshape1.rbegin());
+    std::copy(shape2.rbegin(), shape2.rend(), extshape2.rbegin());
+    
+    auto it1 = extshape1.begin();
+    auto it2 = extshape2.begin();
+    auto itres = res.begin();
+    for(; it1 != extshape1.end(); ++it1, ++it2, ++itres)
+    {
+        if(*it1 == *it2)
+            *itres = *it1;
+        else if(*it1==1)
+            *itres = *it2;
+        else if(*it2==1)
+            *itres = *it1;
+        else
+            throw std::invalid_argument("Shapes <shape1> and <shape2> are not broadcastable");
+    }
+    
+    return res;
+}
 
 // Sequential strides.
 Strides seqStrides(const Shape& shape, const Strides& strides)

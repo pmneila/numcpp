@@ -1,0 +1,10 @@
+
+- Broadcasted zip (with creation of outputs?)
+- Initialization from vector (nested vectors too?)
+- Reshape
+- isContiguous
+- Manager with external data
+- squeeze
+- Indexing with creation of new axes
+- Contiguous iterator?
+- Sliced iterator?
