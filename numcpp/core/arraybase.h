@@ -53,7 +53,7 @@ public:
         return *reinterpret_cast<T*>(_data + offset);
     }
     
-    ArrayRef<T> operator[](std::vector<Index>& index)
+    ArrayRef<T> operator[](std::vector<Index> index)
     {
         std::ptrdiff_t newOffset = _core.offset();
         

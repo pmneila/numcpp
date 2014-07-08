@@ -42,6 +42,29 @@ public:
     virtual unsigned char* data() const {return _array.get();}    
 };
 
+struct NullOwner {};
+
+template<typename U>
+class ExternalManager : public Manager, private U
+{
+public:
+    typedef U Owner;
+    
+    static Manager::Ptr build(unsigned char* data, const Owner& owner)
+    {
+        Manager::Ptr r(new ExternalManager(data, owner));
+        return r;
+    }
+    
+    virtual unsigned char* data() const {return _data;}
+    
+private:
+    explicit ExternalManager(unsigned char* data, const Owner& owner)
+        : Owner(owner), _data(data)
+    {}
+    unsigned char* _data;
+};
+
 }
 
 #endif

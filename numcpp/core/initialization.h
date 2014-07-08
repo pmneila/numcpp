@@ -43,6 +43,46 @@ Array<T> empty(const Shape& shape)
     return Array<T>(core);
 }
 
+template<typename T, typename Owner>
+Array<T> external(T* data, const Shape& shape, const Strides& strides, const Owner& owner)
+{
+    Manager::Ptr manager = ExternalManager<Owner>::build(reinterpret_cast<unsigned char*>(data), owner);
+    
+    ArrayCore core(shape, strides, manager, 0);
+    
+    return Array<T>(core);
+}
+
+template<typename T>
+Array<T> external(T* data, const Shape& shape, const Strides& strides)
+{
+    Manager::Ptr manager = ExternalManager<NullOwner>::build(reinterpret_cast<unsigned char*>(data), NullOwner());
+    
+    ArrayCore core(shape, strides, manager, 0);
+    
+    return Array<T>(core);
+}
+
+template<typename T, typename Owner>
+Array<T> external(T* data, const Shape& shape, const Owner& owner)
+{
+    Manager::Ptr manager = ExternalManager<Owner>::build(reinterpret_cast<unsigned char*>(data), owner);
+    
+    ArrayCore core(shape, contiguousStrides(shape, sizeof(T)), manager, 0);
+    
+    return Array<T>(core);
+}
+
+template<typename T>
+Array<T> external(T* data, const Shape& shape)
+{
+    Manager::Ptr manager = ExternalManager<NullOwner>::build(reinterpret_cast<unsigned char*>(data), NullOwner());
+    
+    ArrayCore core(shape, contiguousStrides(shape, sizeof(T)), manager, 0);
+    
+    return Array<T>(core);
+}
+
 // Create a broadcasted array only if possible.
 template<typename T>
 Array<T> broadcast(const Array<T>& array, const Shape& newShape)
