@@ -57,23 +57,25 @@ public:
     {
         std::ptrdiff_t newOffset = _core.offset();
         
-        int ndims = this->ndims();
-        
-        if(index.size() > ndims)
-            throw std::invalid_argument("the index has more elements than array dimensions");
-        
-        if(index.size() < ndims)
-            index.resize(ndims, full);
-        
         Strides newStrides;
         Shape newShape;
         
         auto shape_it = shape().begin();
         auto strides_it = strides().begin();
         for(auto index_it = index.begin(); index_it != index.end();
-            ++index_it, ++shape_it, ++strides_it)
+            ++index_it)
         {
             int start;
+            
+            if(index_it->isNewAxis())
+            {
+                newShape.push_back(1);
+                newStrides.push_back(0);
+                continue;
+            }
+            
+            if(shape_it == shape().end())
+                throw std::invalid_argument("the index has more elements than array dimensions");
             
             if(index_it->isSingleton())
             {
@@ -96,6 +98,15 @@ public:
             }
             
             newOffset += start * *strides_it;
+            
+            ++shape_it;
+            ++strides_it;
+        }
+        
+        for(; shape_it != shape().end(); ++shape_it, ++strides_it)
+        {
+            newShape.push_back(*shape_it);
+            newStrides.push_back(*strides_it);
         }
         
         return ArrayRef<T>(ArrayCore(newShape, newStrides, manager(), newOffset));

@@ -5,6 +5,8 @@
 #include "abstractexpression.h"
 #include "dyntypearray.h"
 
+#include "itertools.h"
+
 namespace numcpp
 {
 
@@ -30,10 +32,23 @@ Total number of elements of the array \a x.
 */
 size_t size(const DynTypeArray& x);
 
-/*!
-Create a similar array to \a x that has the same type, dimension and shape.
-*/
-DynTypeArray similar(const DynTypeArray& x);
+template<typename T>
+Array<T> squeeze(const Array<T>& arr)
+{
+    Shape newShape;
+    Strides newStrides;
+    
+    for(auto it: czip(arr.shape(), arr.strides()))
+    {
+        if(std::get<0>(it)!=1)
+        {
+            newShape.push_back(std::get<0>(it));
+            newStrides.push_back(std::get<1>(it));
+        }
+    }
+    
+    return Array<T>(ArrayCore(newShape, newStrides, arr.manager(), arr.offset()));
+}
 
 template<class Array>
 Array similar(const Array& x)
@@ -90,14 +105,23 @@ std::ostream& operator<<(std::ostream& os, const Slice& slice)
     return os;
 }
 
-// std::ostream& operator<< (std::ostream& os, const Shape& x)
-// {
-//     os << "(";
-//     for(auto& y: x)
-//         os << y << " ";
-//     os << ")";
-//     return os;
-// }
+std::ostream& operator<< (std::ostream& os, const Shape& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << ",";
+    os << ")";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const Strides& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << ", ";
+    os << ")";
+    return os;
+}
 
 /*! 
 Ostream operator for Array

@@ -32,6 +32,12 @@ namespace detail
         return for_each(t, f, gen_seq<sizeof...(Ts)>());
     }
     
+    template<typename... Ts, typename F>
+    auto for_each_in_tuple(const std::tuple<Ts...>& t, F f) -> decltype(for_each(t, f, gen_seq<sizeof...(Ts)>()))
+    {
+        return for_each(t, f, gen_seq<sizeof...(Ts)>());
+    }
+    
     template<typename T, typename F, int... Is>
     auto for_each_ref(T& t, F f, seq<Is...>) -> decltype(std::forward_as_tuple(f(std::get<Is>(t))...))
     {
@@ -70,6 +76,24 @@ namespace detail
     {
         template<typename T>
         typename T::iterator operator () (T& t)
+        {
+            return t.end();
+        }
+    };
+    
+    struct cbegin_functor
+    {
+        template<typename T>
+        typename T::const_iterator operator () (const T& t)
+        {
+            return t.begin();
+        }
+    };
+    
+    struct cend_functor
+    {
+        template<typename T>
+        typename T::const_iterator operator () (const T& t)
         {
             return t.end();
         }
@@ -188,6 +212,18 @@ public:
         return ZipIterator<typename Iterables::iterator...>(aux);
     }
     
+    ZipIterator<typename Iterables::const_iterator...> begin() const
+    {
+        auto aux = detail::for_each_in_tuple(_iterables, detail::cbegin_functor());
+        return ZipIterator<typename Iterables::const_iterator...>(aux);
+    }
+    
+    ZipIterator<typename Iterables::const_iterator...> end() const
+    {
+        auto aux = detail::for_each_in_tuple(_iterables, detail::cend_functor());
+        return ZipIterator<typename Iterables::const_iterator...>(aux);
+    }
+    
     const iterable_tuple& iterables() const {return _iterables;}
     
 protected:
@@ -196,6 +232,14 @@ protected:
 
 template<typename... Iterables>
 Zip<Iterables...> zip(Iterables&... iterables)
+{
+    typedef std::tuple<Iterables&...> Tuple;
+    Tuple t(iterables...);
+    return Zip<Iterables...>(t);
+}
+
+template<typename... Iterables>
+const Zip<Iterables...> czip(Iterables&... iterables)
 {
     typedef std::tuple<Iterables&...> Tuple;
     Tuple t(iterables...);
