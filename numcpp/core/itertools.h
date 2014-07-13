@@ -26,16 +26,11 @@ namespace detail
         return l;
     }
     
-    template<typename... Ts, typename F>
-    auto for_each_in_tuple(std::tuple<Ts...>& t, F f) -> decltype(for_each(t, f, gen_seq<sizeof...(Ts)>()))
+    template<typename T, typename F, int... Is>
+    auto for_each(T& t1, T& t2, F f, seq<Is...>)
+        -> std::vector<decltype(f(std::get<0>(t1), std::get<0>(t2)))>
     {
-        return for_each(t, f, gen_seq<sizeof...(Ts)>());
-    }
-    
-    template<typename... Ts, typename F>
-    auto for_each_in_tuple(const std::tuple<Ts...>& t, F f) -> decltype(for_each(t, f, gen_seq<sizeof...(Ts)>()))
-    {
-        return for_each(t, f, gen_seq<sizeof...(Ts)>());
+        return std::vector<bool>{f(std::get<Is>(t1), std::get<Is>(t2))...};
     }
     
     template<typename T, typename F, int... Is>
@@ -46,56 +41,39 @@ namespace detail
     }
     
     template<typename... Ts, typename F>
+    auto for_each_in_tuple(std::tuple<Ts...>& t, F f) -> decltype(for_each(t, f, gen_seq<sizeof...(Ts)>()))
+    {
+        return for_each(t, f, gen_seq<sizeof...(Ts)>());
+    }
+    
+    template<typename... Ts, typename F>
+    auto for_each_in_tuple(const std::tuple<Ts...>& t1, const std::tuple<Ts...>& t2, F f)
+        -> decltype(for_each(t1, t2, f, gen_seq<sizeof...(Ts)>()))
+    {
+        return for_each(t1, t2, f, gen_seq<sizeof...(Ts)>());
+    }
+    
+    template<typename... Ts, typename F>
     auto for_each_in_tuple_ref(std::tuple<Ts...>& t, F f) -> decltype(for_each_ref(t, f, gen_seq<sizeof...(Ts)>()))
     {
         return for_each_ref(t, f, gen_seq<sizeof...(Ts)>());
     }
     
-    template<typename T, typename F, int... Is>
-    std::vector<bool> for_each(T& t1, T& t2, F f, seq<Is...>)
-    {
-        return std::vector<bool>{f(std::get<Is>(t1), std::get<Is>(t2))...};
-    }
-    
-    template<typename... Ts, typename F>
-    std::vector<bool> for_each_in_tuples(const std::tuple<Ts...>& t1, const std::tuple<Ts...>& t2, F f)
-    {
-        return for_each(t1, t2, f, gen_seq<sizeof...(Ts)>());
-    }
-    
     struct begin_functor
     {
         template<typename T>
-        typename T::iterator operator () (T& t)
+        auto operator () (T& t) -> decltype(std::begin(t))
         {
-            return t.begin();
+            return std::begin(t);
         }
     };
     
     struct end_functor
     {
         template<typename T>
-        typename T::iterator operator () (T& t)
+        auto operator () (T& t) -> decltype(std::end(t))
         {
-            return t.end();
-        }
-    };
-    
-    struct cbegin_functor
-    {
-        template<typename T>
-        typename T::const_iterator operator () (const T& t)
-        {
-            return t.begin();
-        }
-    };
-    
-    struct cend_functor
-    {
-        template<typename T>
-        typename T::const_iterator operator () (const T& t)
-        {
-            return t.end();
+            return std::end(t);
         }
     };
     
@@ -121,7 +99,7 @@ namespace detail
     struct equal_functor
     {
         template<typename T>
-        bool operator () (T& t1, T& t2)
+        auto operator () (T& t1, T& t2) -> decltype(t1 == t2)
         {
             return t1 == t2;
         }
@@ -130,21 +108,20 @@ namespace detail
     struct notequal_functor
     {
         template<typename T>
-        bool operator () (T& t1, T& t2)
+        auto operator () (T& t1, T& t2) -> decltype(t1 != t2)
         {
             return t1 != t2;
         }
     };
 }
 
-template<typename... Iterators>
+template<typename iterators_tuple>
 class ZipIterator
 {
-private:
+protected:
+    iterators_tuple _iterators;
+
 public:
-    typedef std::tuple<Iterators...> iterators_tuple;
-    typedef std::tuple<typename Iterators::value_type...> values_tuple;
-    
     ZipIterator(const iterators_tuple& t)
         : _iterators(t)
     {}
@@ -166,27 +143,24 @@ public:
         return aux;
     }
     
-    values_tuple operator*()
+    auto operator*() -> decltype(detail::for_each_in_tuple_ref(this->_iterators, detail::dereference_functor()))
     {
         return detail::for_each_in_tuple_ref(_iterators, detail::dereference_functor());
     }
     
     bool operator==(const ZipIterator& rhs)
     {
-        auto aux = detail::for_each_in_tuples(_iterators, rhs._iterators, detail::equal_functor());
+        auto aux = detail::for_each_in_tuple(_iterators, rhs._iterators, detail::equal_functor());
         return std::any_of(aux.begin(), aux.end(), [](bool v) -> bool {return v;});
     }
     
     bool operator!=(const ZipIterator& rhs)
     {
-        auto aux = detail::for_each_in_tuples(_iterators, rhs._iterators, detail::notequal_functor());
+        auto aux = detail::for_each_in_tuple(_iterators, rhs._iterators, detail::notequal_functor());
         return std::all_of(aux.begin(), aux.end(), [](bool v) -> bool {return v;});
     }
     
     const iterators_tuple& iterators() const {return _iterators;}
-    
-protected:
-    iterators_tuple _iterators;
 };
 
 template<typename... Iterables>
@@ -196,50 +170,33 @@ public:
     typedef std::tuple<Iterables&...> iterable_tuple;
     static const unsigned int size = sizeof...(Iterables);
     
+protected:
+    iterable_tuple _iterables;
+    // Iterables... _asdf;
+
+public:
     Zip(const iterable_tuple& t)
         : _iterables(t)
     {}
     
-    ZipIterator<typename Iterables::iterator...> begin()
+    auto begin() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::begin_functor()))>
     {
         auto aux = detail::for_each_in_tuple(_iterables, detail::begin_functor());
-        return ZipIterator<typename Iterables::iterator...>(aux);
+        return ZipIterator<decltype(aux)>(aux);
     }
     
-    ZipIterator<typename Iterables::iterator...> end()
+    auto end() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::end_functor()))>
     {
         auto aux = detail::for_each_in_tuple(_iterables, detail::end_functor());
-        return ZipIterator<typename Iterables::iterator...>(aux);
-    }
-    
-    ZipIterator<typename Iterables::const_iterator...> begin() const
-    {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::cbegin_functor());
-        return ZipIterator<typename Iterables::const_iterator...>(aux);
-    }
-    
-    ZipIterator<typename Iterables::const_iterator...> end() const
-    {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::cend_functor());
-        return ZipIterator<typename Iterables::const_iterator...>(aux);
+        return ZipIterator<decltype(aux)>(aux);
     }
     
     const iterable_tuple& iterables() const {return _iterables;}
     
-protected:
-    iterable_tuple _iterables;
 };
 
 template<typename... Iterables>
 Zip<Iterables...> zip(Iterables&... iterables)
-{
-    typedef std::tuple<Iterables&...> Tuple;
-    Tuple t(iterables...);
-    return Zip<Iterables...>(t);
-}
-
-template<typename... Iterables>
-const Zip<Iterables...> czip(Iterables&... iterables)
 {
     typedef std::tuple<Iterables&...> Tuple;
     Tuple t(iterables...);

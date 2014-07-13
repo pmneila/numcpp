@@ -38,7 +38,7 @@ Array<T> squeeze(const Array<T>& arr)
     Shape newShape;
     Strides newStrides;
     
-    for(auto it: czip(arr.shape(), arr.strides()))
+    for(auto it: zip(arr.shape(), arr.strides()))
     {
         if(std::get<0>(it)!=1)
         {

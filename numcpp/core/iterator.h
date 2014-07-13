@@ -10,18 +10,6 @@ namespace numcpp
 template<typename T>
 class Iterator
 {
-private:
-    unsigned char* pointer_end() const
-    {
-        Shape end_counter(_core.ndims());
-        const Shape& shape = _core.shape();
-        
-        std::transform(shape.begin(), shape.end(), end_counter.begin(),
-            [](Shape::value_type v) -> Shape::value_type {return v - 1;});
-        
-        return _core.data() + _core.offset(end_counter) + _seq_strides.back();
-    }
-    
 protected:
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
