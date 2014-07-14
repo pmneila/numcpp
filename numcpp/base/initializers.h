@@ -3,6 +3,7 @@
 
 #include "../core.h"
 
+#if 0
 namespace numcpp
 {
 
@@ -203,5 +204,7 @@ Array<T> array(std::vector<T> x)
 /*! @} */
 
 }
+
+#endif
 
 #endif

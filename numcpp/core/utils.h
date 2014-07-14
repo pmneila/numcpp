@@ -19,6 +19,24 @@ namespace numcpp
 typedef std::vector<size_t> Shape;
 typedef std::vector<std::ptrdiff_t> Strides;
 
+std::ostream& operator<< (std::ostream& os, const Shape& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << ",";
+    os << ")";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const Strides& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << ", ";
+    os << ")";
+    return os;
+}
+
 template<class Array>
 typename Array::value_type prod(Array x)
 {

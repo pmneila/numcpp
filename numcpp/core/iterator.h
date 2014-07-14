@@ -32,6 +32,7 @@ public:
     
     Iterator(const Iterator& rhs)
         : _core(rhs._core)
+        , _seq_strides(rhs._seq_strides)
         , _counter(rhs._counter)
         , _pointer_end(rhs._pointer_end)
         , _pointer(rhs._pointer)
@@ -40,6 +41,7 @@ public:
     Iterator& operator=(const Iterator& rhs)
     {
         _core = rhs._core;
+        _seq_strides = rhs._seq_strides;
         _counter = rhs._counter;
         _pointer = rhs._pointer;
         _pointer_end = rhs._pointer_end;
@@ -77,12 +79,12 @@ public:
     
     T& operator*() {return *reinterpret_cast<T*>(_pointer);}
     
-    bool operator==(const Iterator& rhs)
+    bool operator==(const Iterator& rhs) const
     {
         return _pointer == rhs._pointer;
     }
     
-    bool operator!=(const Iterator& rhs)
+    bool operator!=(const Iterator& rhs) const
     {
         return _pointer != rhs._pointer;
     }

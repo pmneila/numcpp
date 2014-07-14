@@ -203,6 +203,33 @@ Zip<Iterables...> zip(Iterables&... iterables)
     return Zip<Iterables...>(t);
 }
 
+template<typename... T>
+class ArrayZip : public Zip<Array<T>...>
+{
+public:
+    typedef Zip<Array<T>...> base;
+    typedef std::tuple<Array<T>...> array_tuple;
+    
+protected:
+    array_tuple _arrays;
+    
+public:
+    ArrayZip(Array<T>... arrays)
+        : _arrays(arrays...), base(_arrays)
+    {}
+    
+    // ArrayZip(const typename base::iterable_tuple& arrays)
+    //     : base(arrays), _arrays(arrays)
+    // {}
+};
+
+template<typename T1, typename T2>
+ArrayZip<T1,T2> array_zip(const Array<T1>& arr1, const Array<T2>& arr2)
+{
+    Shape bshape = broadcastedShape(arr1.shape(), arr2.shape());
+    return ArrayZip<T1, T2>(broadcast(arr1, bshape), broadcast(arr2, bshape));
+}
+
 }
 
 #endif

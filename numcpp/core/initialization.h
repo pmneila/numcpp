@@ -43,6 +43,14 @@ Array<T> empty(const Shape& shape)
     return Array<T>(core);
 }
 
+template<typename T>
+Array<T> zeros(const Shape& shape)
+{
+    Array<T> res = empty<T>(shape);
+    res.deep() = T(0);
+    return res;
+}
+
 template<typename T, typename Owner>
 Array<T> external(T* data, const Shape& shape, const Strides& strides, const Owner& owner)
 {

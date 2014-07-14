@@ -66,6 +66,11 @@ public:
         return _offset + std::inner_product(index.begin(), index.end(), _strides.begin(), 0);
     }
     
+    bool isEmpty() const
+    {
+        return (bool)_manager;
+    }
+    
 protected:
     Shape _shape;
     Strides _strides;
