@@ -94,6 +94,7 @@ public:
         _pointer = _pointer_end;
     }
     
+    /// Undefined when the iterator is at end
     const Shape& counter() const {return _counter;}
     
     std::ptrdiff_t offset() const {return _pointer - _core.data();}

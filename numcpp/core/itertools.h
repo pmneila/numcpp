@@ -172,8 +172,7 @@ public:
     
 protected:
     iterable_tuple _iterables;
-    // Iterables... _asdf;
-
+    
 public:
     Zip(const iterable_tuple& t)
         : _iterables(t)
@@ -203,31 +202,42 @@ Zip<Iterables...> zip(Iterables&... iterables)
     return Zip<Iterables...>(t);
 }
 
+// Similar to Zip, but ArrayZip holds the iterables, not just references.
 template<typename... T>
-class ArrayZip : public Zip<Array<T>...>
+class ArrayZip
 {
 public:
-    typedef Zip<Array<T>...> base;
-    typedef std::tuple<Array<T>...> array_tuple;
+    typedef std::tuple<Array<T>...> iterable_tuple;
     
 protected:
-    array_tuple _arrays;
+    iterable_tuple _iterables;
     
 public:
-    ArrayZip(Array<T>... arrays)
-        : _arrays(arrays...), base(_arrays)
+    ArrayZip(const Array<T>&... arrays)
+        : _iterables(arrays...)
     {}
     
-    // ArrayZip(const typename base::iterable_tuple& arrays)
-    //     : base(arrays), _arrays(arrays)
-    // {}
+    auto begin() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::begin_functor()))>
+    {
+        auto aux = detail::for_each_in_tuple(_iterables, detail::begin_functor());
+        return ZipIterator<decltype(aux)>(aux);
+    }
+    
+    auto end() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::end_functor()))>
+    {
+        auto aux = detail::for_each_in_tuple(_iterables, detail::end_functor());
+        return ZipIterator<decltype(aux)>(aux);
+    }
+    
+    const iterable_tuple& iterables() const {return _iterables;}
 };
 
-template<typename T1, typename T2>
-ArrayZip<T1,T2> array_zip(const Array<T1>& arr1, const Array<T2>& arr2)
+template<typename... T>
+ArrayZip<T...> array_zip(const Array<T>&... arr)
 {
-    Shape bshape = broadcastedShape(arr1.shape(), arr2.shape());
-    return ArrayZip<T1, T2>(broadcast(arr1, bshape), broadcast(arr2, bshape));
+    Shape bshape = broadcastedShape(arr.shape()...);
+    
+    return ArrayZip<T...>(broadcast(arr, bshape)...);
 }
 
 }

@@ -54,7 +54,7 @@ public:
     
     Manager::Ptr manager() const {return _manager;}
     
-    unsigned char* data() const {return _manager->data();}
+    unsigned char* data() const {return (bool)_manager ? _manager->data() : 0;}
     
     std::ptrdiff_t offset() const {return _offset;}
     
@@ -68,7 +68,7 @@ public:
     
     bool isEmpty() const
     {
-        return (bool)_manager;
+        return !(bool)_manager;
     }
     
 protected:
