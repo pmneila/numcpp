@@ -81,6 +81,12 @@ Shape broadcastedShape(const Shape& shape1, const Shape& shape2)
     return res;
 }
 
+Shape broadcastShapes(const std::vector<Shape>& shapes)
+{
+    return std::accumulate(shapes.begin(), shapes.end(), Shape(),
+        broadcastedShape);
+}
+
 // Sequential strides.
 Strides seqStrides(const Shape& shape, const Strides& strides)
 {

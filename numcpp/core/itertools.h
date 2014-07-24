@@ -235,7 +235,7 @@ public:
 template<typename... T>
 ArrayZip<T...> array_zip(const Array<T>&... arr)
 {
-    Shape bshape = broadcastedShape(arr.shape()...);
+    Shape bshape = broadcastShapes({arr.shape()...});
     
     return ArrayZip<T...>(broadcast(arr, bshape)...);
 }
