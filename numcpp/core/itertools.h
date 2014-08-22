@@ -113,6 +113,7 @@ namespace detail
             return t1 != t2;
         }
     };
+    
 }
 
 template<typename iterators_tuple>
@@ -202,6 +203,28 @@ Zip<Iterables...> zip(Iterables&... iterables)
     return Zip<Iterables...>(t);
 }
 
+namespace detail
+{
+    struct init_shape
+    {
+        Shape _shape;
+        
+        init_shape(const Shape& shape)
+            : _shape(shape)
+        {}
+        
+        template<typename T>
+        int operator () (Array<T>& t)
+        {
+            if(t.isEmpty())
+            {
+                t = empty<T>(_shape);
+            }
+            return 0;
+        }
+    };
+};
+
 // Similar to Zip, but ArrayZip holds the iterables, not just references.
 template<typename... T>
 class ArrayZip
@@ -213,9 +236,11 @@ protected:
     iterable_tuple _iterables;
     
 public:
-    ArrayZip(const Array<T>&... arrays)
+    ArrayZip(const Shape& shape, const Array<T>&... arrays)
         : _iterables(arrays...)
-    {}
+    {
+        for_each_in_tuple(_iterables, detail::init_shape(shape));
+    }
     
     auto begin() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::begin_functor()))>
     {
@@ -237,7 +262,7 @@ ArrayZip<T...> array_zip(const Array<T>&... arr)
 {
     Shape bshape = broadcastShapes({arr.shape()...});
     
-    return ArrayZip<T...>(broadcast(arr, bshape)...);
+    return ArrayZip<T...>(bshape, broadcast(arr, bshape)...);
 }
 
 }
