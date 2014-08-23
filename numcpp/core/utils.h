@@ -1,3 +1,4 @@
+
 #ifndef NUMCPP_UTILS_H
 #define NUMCPP_UTILS_H
 
@@ -9,33 +10,8 @@
 namespace numcpp
 {
 
-/*!
-@file
-
-@addtogroup core
-@{
-*/
-
 typedef std::vector<size_t> Shape;
 typedef std::vector<std::ptrdiff_t> Strides;
-
-std::ostream& operator<< (std::ostream& os, const Shape& x)
-{
-    os << "(";
-    for(auto& y: x)
-        os << y << ",";
-    os << ")";
-    return os;
-}
-
-std::ostream& operator<< (std::ostream& os, const Strides& x)
-{
-    os << "(";
-    for(auto& y: x)
-        os << y << ", ";
-    os << ")";
-    return os;
-}
 
 template<class Array>
 typename Array::value_type prod(Array x)
@@ -103,38 +79,11 @@ Strides seqStrides(const Shape& shape, const Strides& strides)
     return res;
 }
 
-template<class T>
-void print(const T& x)
-{
-  std::cout << x << std::endl;
-}
-
-// template<class T>
-// std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
-// {
-//   for(auto& y: x)
-//     os << y << " ";
-//   return os;
-// }
-
 // Ceil of the integer division a/b
 template<typename T>
 T ceil_div(const T& a, const T& b)
 {
     return (a - 1)/b + 1;
-}
-
-void copyShapeToSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis);
-
-void copyShapeFromSubArray(const std::vector<size_t>& shapeIn, std::vector<size_t>& shapeOut, int axis);
-
-
-template<class Array>
-void println (const Array& x)
-{
-  for(int i=0; i<x.size(); i++)
-    std::cout << x[i] << " ";
-  std::cout << std::endl;
 }
 
 /// Clock type that can hold the current time point.
@@ -164,11 +113,6 @@ toc(t);
 \sa tic()
 */
 size_t toc(clock::time_point t, bool print=true);
-
-
-
-/*! @} */
-
 
 }
 
