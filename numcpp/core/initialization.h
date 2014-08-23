@@ -62,7 +62,7 @@ Array<T> ones(const Shape& shape)
 template<typename T>
 Array<T> copy(const Array<T>& in)
 {
-    Array<T> res = empty(in.shape());
+    Array<T> res = empty<T>(in.shape());
     res.deep() = in;
     return res;
 }
@@ -151,7 +151,11 @@ Array<T> reshape(const Array<T>& array, const Shape& newShape)
     if(array.numElements() != prod(newShape))
         throw std::invalid_argument("total size of the array must be unchanged");
     
+    if(!array.isContiguous())
+        return reshape(copy(array), newShape);
     
+    Strides newStrides = contiguousStrides(newShape, sizeof(T));
+    return Array<T>(ArrayCore(newShape, newStrides, array.manager(), array.offset()));
 }
 
 }

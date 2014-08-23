@@ -140,7 +140,21 @@ public:
     
     bool isContiguous() const
     {
-        // TODO.
+        // return contiguousStrides(shape(), sizeof(DT)) == strides();
+        size_t value = sizeof(DT);
+        
+        auto strides_it = strides().rbegin();
+        auto strides_it_end = strides().rend();
+        auto shape_it = shape().rbegin();
+        for(; strides_it != strides_it_end; ++strides_it, ++shape_it)
+        {
+            if(*strides_it != value)
+                return false;
+            
+            value *= *shape_it;
+        }
+        
+        return true;
     }
 };
 
