@@ -3,7 +3,7 @@
 
 #include <numcpp/core.h>
 //#include <numcpp/expressions.h>
-#include <numcpp/base.h>
+//#include <numcpp/base.h>
 //#include <numcpp/io.h>
 
 // #include "numcpp/fft.h"

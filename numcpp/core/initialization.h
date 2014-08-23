@@ -51,6 +51,22 @@ Array<T> zeros(const Shape& shape)
     return res;
 }
 
+template<typename T>
+Array<T> ones(const Shape& shape)
+{
+    Array<T> res = empty<T>(shape);
+    res.deep() = T(1);
+    return res;
+}
+
+template<typename T>
+Array<T> copy(const Array<T>& in)
+{
+    Array<T> res = empty(in.shape());
+    res.deep() = in;
+    return res;
+}
+
 template<typename T, typename Owner>
 Array<T> external(T* data, const Shape& shape, const Strides& strides, const Owner& owner)
 {
@@ -127,6 +143,15 @@ Array<T> broadcast(const Array<T>& array, const Shape& newShape)
     }
     
     return Array<T>(ArrayCore(newShape, newStrides, array.manager(), array.offset()));
+}
+
+template<typename T>
+Array<T> reshape(const Array<T>& array, const Shape& newShape)
+{
+    if(array.numElements() != prod(newShape))
+        throw std::invalid_argument("total size of the array must be unchanged");
+    
+    
 }
 
 }

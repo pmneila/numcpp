@@ -15,8 +15,8 @@ template<class T> class Array;
 template<class T> class ArrayRef;
 template<typename T> class Iterator;
 
-template <typename T, typename Derived>
-class ArrayBase : public AbstractArrayExpression<T, Derived>
+template <typename DT, typename Derived>
+class ArrayBase : public AbstractArrayExpression<DT, Derived>
 {
 protected:
     unsigned char* _data;
@@ -39,21 +39,21 @@ protected:
     }
     
 public:
-    typedef T value_type;
-    typedef T& reference;
-    typedef const T& const_reference;
-    typedef T* pointer;
-    typedef const T* const_pointer;
-    typedef Iterator<T> iterator;
-    typedef Iterator<const T> const_iterator;
+    typedef DT value_type;
+    typedef DT& reference;
+    typedef const DT& const_reference;
+    typedef DT* pointer;
+    typedef const DT* const_pointer;
+    typedef Iterator<DT> iterator;
+    typedef Iterator<const DT> const_iterator;
     
-    T& operator[](const std::vector<size_t>& index)
+    DT& operator[](const std::vector<size_t>& index)
     {
         std::ptrdiff_t offset = _core.offset(index);
-        return *reinterpret_cast<T*>(_data + offset);
+        return *reinterpret_cast<DT*>(_data + offset);
     }
     
-    ArrayRef<T> operator[](std::vector<Index> index)
+    ArrayRef<DT> operator[](std::vector<Index> index)
     {
         std::ptrdiff_t newOffset = _core.offset();
         
@@ -109,7 +109,17 @@ public:
             newStrides.push_back(*strides_it);
         }
         
-        return ArrayRef<T>(ArrayCore(newShape, newStrides, manager(), newOffset));
+        return ArrayRef<DT>(ArrayCore(newShape, newStrides, manager(), newOffset));
+    }
+    
+    Array<DT> T()
+    {
+        Shape newShape(shape());
+        Strides newStrides(strides());
+        std::reverse(newShape.begin(), newShape.end());
+        std::reverse(newStrides.begin(), newStrides.end());
+        
+        return Array<DT>(ArrayCore(newShape, newStrides, manager(), offset()));
     }
     
     iterator begin();
@@ -122,11 +132,16 @@ public:
     Manager::Ptr manager() const {return _core.manager();}
     bool isEmpty() const {return _core.isEmpty();}
     
-    T* data() const {return reinterpret_cast<T*>(_data);}
+    DT* data() const {return reinterpret_cast<DT*>(_data);}
     std::ptrdiff_t offset() const {return _core.offset();}
     
     ArrayCore& core() {return _core;}
     const ArrayCore& core() const {return _core;}
+    
+    bool isContiguous() const
+    {
+        // TODO.
+    }
 };
 
 }

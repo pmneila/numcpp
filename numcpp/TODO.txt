@@ -9,3 +9,8 @@
 - Contiguous iterator?
 - Sliced iterator?
 - Concatenate and stack arrays
+- Type casting -- Done
+- Print
+- Copy -- Done
+- Transpose -- Done
+- Reductions
