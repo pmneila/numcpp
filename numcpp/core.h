@@ -1,11 +1,12 @@
 #ifndef NUMCPP_CORE_H
 #define NUMCPP_CORE_H
 
+#include "core/utils.h"
+#include "core/manager.h"
 #include "core/array.h"
 #include "core/arrayref.h"
 #include "core/initialization.h"
-// #include "core/coreFunc.h"
-#include "core/constants.h"
+// #include "core/constants.h"
 #include "core/iterator.h"
 #include "core/itertools.h"
 #include "core/functions.h"

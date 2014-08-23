@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <vector>
 #include <chrono>
+#include <algorithm>
 
 namespace numcpp
 {

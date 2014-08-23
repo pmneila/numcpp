@@ -2,10 +2,7 @@
 #ifndef NUMCPP_ARRAYBASE_H
 #define NUMCPP_ARRAYBASE_H
 
-#include <algorithm>
-
 #include "arraycore.h"
-#include "abstractexpression.h"
 #include "index.h"
 
 namespace numcpp
@@ -16,7 +13,7 @@ template<class T> class ArrayRef;
 template<typename T> class Iterator;
 
 template <typename DT, typename Derived>
-class ArrayBase : public AbstractArrayExpression<DT, Derived>
+class ArrayBase
 {
 protected:
     unsigned char* _data;

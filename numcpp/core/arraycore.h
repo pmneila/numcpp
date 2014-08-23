@@ -5,9 +5,6 @@
 #include <vector>
 #include <numeric>
 
-#include "utils.h"
-#include "manager.h"
-
 namespace numcpp
 {
 
