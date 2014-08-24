@@ -121,7 +121,7 @@ Array<Tout> cast(const Array<Tin>& in)
     return array_map([](const Tin& a){return static_cast<Tout>(a);}, in);
 }
 
-#define VECTORIZE2(vectorizedname, name) \
+#define VECTORIZE(vectorizedname, name) \
 template<typename... T> \
 auto vectorizedname(const Array<T>&... arr) \
     -> decltype(array_map(name, arr...)) \
@@ -129,48 +129,48 @@ auto vectorizedname(const Array<T>&... arr) \
     return array_map(name, arr...); \
 }
 
-VECTORIZE2(sin, ::sin)
-VECTORIZE2(cos, ::cos)
-VECTORIZE2(tan, ::tan)
-VECTORIZE2(asin, ::asin)
-VECTORIZE2(acos, ::acos)
-VECTORIZE2(atan, ::atan)
-VECTORIZE2(atan2, ::atan2)
+VECTORIZE(sin, ::sin)
+VECTORIZE(cos, ::cos)
+VECTORIZE(tan, ::tan)
+VECTORIZE(asin, ::asin)
+VECTORIZE(acos, ::acos)
+VECTORIZE(atan, ::atan)
+VECTORIZE(atan2, ::atan2)
 
-VECTORIZE2(sinh, ::sinh)
-VECTORIZE2(cosh, ::cosh)
-VECTORIZE2(tanh, ::tanh)
-VECTORIZE2(asinh, ::asinh)
-VECTORIZE2(acosh, ::acosh)
-VECTORIZE2(atanh, ::atanh)
+VECTORIZE(sinh, ::sinh)
+VECTORIZE(cosh, ::cosh)
+VECTORIZE(tanh, ::tanh)
+VECTORIZE(asinh, ::asinh)
+VECTORIZE(acosh, ::acosh)
+VECTORIZE(atanh, ::atanh)
 
-VECTORIZE2(exp, ::exp)
-VECTORIZE2(log, ::log)
-VECTORIZE2(log10, ::log10)
-VECTORIZE2(exp2, ::exp2)
-VECTORIZE2(expm1, ::expm1)
-VECTORIZE2(ilogb, ::ilogb)
-VECTORIZE2(log2, ::log2)
+VECTORIZE(exp, ::exp)
+VECTORIZE(log, ::log)
+VECTORIZE(log10, ::log10)
+VECTORIZE(exp2, ::exp2)
+VECTORIZE(expm1, ::expm1)
+VECTORIZE(ilogb, ::ilogb)
+VECTORIZE(log2, ::log2)
 
-VECTORIZE2(pow, ::pow)
-VECTORIZE2(sqrt, ::sqrt)
-VECTORIZE2(cbrt, ::cbrt)
-VECTORIZE2(hypot, ::hypot)
+VECTORIZE(pow, ::pow)
+VECTORIZE(sqrt, ::sqrt)
+VECTORIZE(cbrt, ::cbrt)
+VECTORIZE(hypot, ::hypot)
 
-VECTORIZE2(ceil, ::ceil)
-VECTORIZE2(floor, ::floor)
-VECTORIZE2(fmod, ::fmod)
-VECTORIZE2(trunc, ::trunc)
-VECTORIZE2(round, ::round)
-VECTORIZE2(lround, ::lround)
+VECTORIZE(ceil, ::ceil)
+VECTORIZE(floor, ::floor)
+VECTORIZE(fmod, ::fmod)
+VECTORIZE(trunc, ::trunc)
+VECTORIZE(round, ::round)
+VECTORIZE(lround, ::lround)
 
-VECTORIZE2(fdim, ::fdim)
-VECTORIZE2(fmax, ::fmax)
-VECTORIZE2(fmin, ::fmin)
+VECTORIZE(fdim, ::fdim)
+VECTORIZE(fmax, ::fmax)
+VECTORIZE(fmin, ::fmin)
 
-VECTORIZE2(isinf, std::isinf)
-VECTORIZE2(isnan, std::isnan)
-VECTORIZE2(isfinite, std::isfinite)
+VECTORIZE(isinf, std::isinf)
+VECTORIZE(isnan, std::isnan)
+VECTORIZE(isfinite, std::isfinite)
 
 }
 

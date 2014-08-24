@@ -52,6 +52,12 @@ Array<T> zeros(const Shape& shape)
 }
 
 template<typename T>
+Array<T> zeros_like(const Array<T>& arr)
+{
+    return zeros<T>(arr.shape());
+}
+
+template<typename T>
 Array<T> ones(const Shape& shape)
 {
     Array<T> res = empty<T>(shape);

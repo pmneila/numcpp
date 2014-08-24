@@ -2,8 +2,6 @@
 #ifndef NUMCPP_ITERATOR_H
 #define NUMCPP_ITERATOR_H
 
-//#include "arraybase.h"
-
 namespace numcpp
 {
 
@@ -105,6 +103,67 @@ private:
     Shape _counter;
     unsigned char* const _pointer_end;
     unsigned char* _pointer;
+};
+
+template<typename T, typename Derived>
+class SliceIterator
+{
+protected:
+    SliceIterator(const ArrayBase<T, Derived>& array, int axis)
+        : _array(array), _axis(axis), _index(0)
+    {}
+    
+    template<typename T2, typename Derived2>
+    friend class ArrayBase;
+    
+public:
+    
+    SliceIterator(const SliceIterator& rhs)
+        : _array(rhs._array), _axis(rhs._axis), _index(rhs._index)
+    {}
+    
+    SliceIterator& operator=(const SliceIterator& rhs)
+    {
+        _array = rhs._array;
+        _axis = rhs._axis;
+        _index = rhs._index;
+    }
+    
+    SliceIterator& operator++()
+    {
+        ++_index;
+        return *this;
+    }
+    
+    SliceIterator& operator++(int)
+    {
+        SliceIterator aux(*this);
+        ++(*this);
+        return aux;
+    }
+    
+    Array<T> operator*()
+    {
+        std::vector<Index> index(_axis+1, S{});
+        index[_axis] = Index(_index);
+        
+        return _array[index];
+    }
+    
+    bool operator==(const SliceIterator& rhs)
+    {
+        return _index == rhs._index && _axis == rhs._axis && &_array == &rhs._array;
+    }
+    
+    bool operator!=(const SliceIterator& rhs)
+    {
+        return _index != rhs._index || _axis != rhs._axis || &_array != &rhs._array;
+    }
+    
+private:
+    const ArrayBase<T, Derived>& _array;
+    int _axis;
+    int _index;
 };
 
 }

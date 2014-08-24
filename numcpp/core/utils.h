@@ -7,12 +7,19 @@
 #include <vector>
 #include <chrono>
 #include <algorithm>
+#include <cassert>
 
 namespace numcpp
 {
 
 typedef std::vector<size_t> Shape;
 typedef std::vector<std::ptrdiff_t> Strides;
+
+template<typename T>
+T clamp(T v, T lower, T upper)
+{
+    return std::max(lower, std::min(v, upper));
+}
 
 template<class Array>
 typename Array::value_type prod(Array x)

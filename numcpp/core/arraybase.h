@@ -11,6 +11,7 @@ namespace numcpp
 template<class T> class Array;
 template<class T> class ArrayRef;
 template<typename T> class Iterator;
+template<typename T, typename Derived> class SliceIterator;
 
 template <typename DT, typename Derived>
 class ArrayBase
@@ -43,14 +44,26 @@ public:
     typedef const DT* const_pointer;
     typedef Iterator<DT> iterator;
     typedef Iterator<const DT> const_iterator;
+    typedef SliceIterator<DT, Derived> slice_iterator;
     
-    DT& operator[](const std::vector<size_t>& index)
+    DT& operator()() const
+    {
+        std::ptrdiff_t offset = _core.offset();
+        return *reinterpret_cast<DT*>(_data + offset);
+    }
+    
+    DT& operator()(const std::vector<size_t>& index) const
     {
         std::ptrdiff_t offset = _core.offset(index);
         return *reinterpret_cast<DT*>(_data + offset);
     }
     
-    ArrayRef<DT> operator[](std::vector<Index> index)
+    ArrayRef<DT> operator[](int index) const
+    {
+        return operator[](std::vector<Index>{index});
+    }
+    
+    ArrayRef<DT> operator[](const std::vector<Index>& index) const
     {
         std::ptrdiff_t newOffset = _core.offset();
         
@@ -76,8 +89,10 @@ public:
             
             if(index_it->isSingleton())
             {
-                int index = index_it->index();
+                int index = index_it->index(*shape_it);
                 start = index;
+                
+                assert((start>=0 && start < *shape_it) && "index out of range");
             }
             else
             {
@@ -87,9 +102,9 @@ public:
                 int step = slice.step();
                 
                 if(step > 0)
-                    newShape.push_back(ceil_div(end - start, step));
+                    newShape.push_back(std::max(0, ceil_div(end - start, step)));
                 else
-                    newShape.push_back(ceil_div(start - end, -step));
+                    newShape.push_back(std::max(0, ceil_div(start - end, -step)));
                 
                 newStrides.push_back(step * *strides_it);
             }
@@ -119,8 +134,11 @@ public:
         return Array<DT>(ArrayCore(newShape, newStrides, manager(), offset()));
     }
     
-    iterator begin();
-    iterator end();
+    iterator begin() const;
+    iterator end() const;
+    
+    slice_iterator slice_begin(int axis) const;
+    slice_iterator slice_end(int axis) const;
     
     int numElements() const {return _core.numElements();}
     const Shape& shape() const {return _core.shape();}
@@ -163,16 +181,38 @@ namespace numcpp
 {
 
 template <typename T, typename Derived>
-typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::begin()
+typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::begin() const
 {
     return iterator(*this);
 }
 
 template <typename T, typename Derived>
-typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::end()
+typename ArrayBase<T, Derived>::iterator ArrayBase<T, Derived>::end() const
 {
     iterator it(*this);
     it.goToEnd();
+    return it;
+}
+
+template <typename T, typename Derived>
+typename ArrayBase<T, Derived>::slice_iterator ArrayBase<T, Derived>::slice_begin(int axis) const
+{
+    if(axis < 0)
+        axis = ndims() + axis;
+    
+    assert(axis >= 0 && axis < ndims());
+    return slice_iterator(*this, axis);
+}
+
+template <typename T, typename Derived>
+typename ArrayBase<T, Derived>::slice_iterator ArrayBase<T, Derived>::slice_end(int axis) const
+{
+    if(axis < 0)
+        axis = ndims() + axis;
+    
+    assert(axis >= 0 && axis < ndims());
+    slice_iterator it(*this, axis);
+    it._index = shape()[axis];
     return it;
 }
 

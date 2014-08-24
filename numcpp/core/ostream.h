@@ -23,8 +23,38 @@ std::ostream& operator<< (std::ostream& os, const Strides& x)
     return os;
 }
 
-template<class T>
-std::ostream& operator<< (std::ostream& os, const Array<T>& x)
+template<typename T>
+std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
+{
+    os << "(";
+    for(auto& y: x)
+        os << y << ", ";
+    os << ")";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const Index& x)
+{
+    static const std::vector<std::string> names = {"INT, SLICE, NEWAXIS"};
+    os << "(";
+    os << names[x.tag()] << ", ";
+    switch(x.tag())
+    {
+    case 0:
+        os << x.index();
+        break;
+    case 1:
+        os << x.slice();
+        break;
+    case 2:
+        os << ":";
+    }
+    os << ")";
+    return os;
+}
+
+template<class T, class Derived>
+std::ostream& operator<< (std::ostream& os, const ArrayBase<T, Derived>& x)
 {
     os << "Array<" << typeid(T).name() << "> {\n";
     os << "  ndims = " << x.ndims() << "\n";

@@ -100,7 +100,8 @@ public:
         }
         
         int v = _start.value();
-        return v >= 0 ? v : shape + v;
+        v = v >= 0 ? v : shape + v;
+        return clamp(v, 0, shape);
     }
     
     std::ptrdiff_t end(int shape) const
@@ -114,7 +115,8 @@ public:
         }
         
         int v = _end.value();
-        return v >= 0 ? v : shape + v;
+        v = v >= 0 ? v : shape + v;
+        return clamp(v, 0, shape);
     }
     
 private:

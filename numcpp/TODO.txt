@@ -7,7 +7,7 @@
 - squeeze -- Done
 - Indexing with creation of new axes -- Done
 - Contiguous iterator?
-- Sliced iterator?
+- Sliced iterator -- Done
 - Concatenate and stack arrays
 - Type casting -- Done
 - Print

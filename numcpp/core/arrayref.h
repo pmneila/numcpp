@@ -26,6 +26,11 @@ public:
         : Super(core)
     {}
     
+    Array<T> shallow() const
+    {
+        return Array<T>(*this);
+    }
+    
     ArrayRef<T>& operator=(const Array<T>& rhs)
     {
         Array<T> arr = broadcast(rhs, this->shape());
