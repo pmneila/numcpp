@@ -13,4 +13,4 @@
 - Print
 - Copy -- Done
 - Transpose -- Done
-- Reductions
+- Reductions -- Done

@@ -18,6 +18,7 @@ namespace detail
     }
 }
 
+// Maps
 template<typename Function, typename... T>
 auto array_map(Function&& f, const Array<T>&... arr)
     -> Array<decltype(f(T()...))>
@@ -171,6 +172,46 @@ VECTORIZE(fmin, ::fmin)
 VECTORIZE(isinf, std::isinf)
 VECTORIZE(isnan, std::isnan)
 VECTORIZE(isfinite, std::isfinite)
+
+// Reductions
+template<typename T>
+T sum(const Array<T>& arr)
+{
+    return std::accumulate(arr.begin(), arr.end(), 0);
+}
+
+template<typename T>
+Array<T> sum(const Array<T>& arr, int axis)
+{
+    if(axis < 0)
+        axis = arr.ndims() + axis;
+    
+    assert(axis >= 0 && axis < arr.ndims());
+    
+    Shape newShape(arr.shape());
+    newShape.erase(newShape.begin() + axis);
+    
+    auto res = zeros<T>(newShape);
+    
+    auto arr_it = arr.slice_begin(axis);
+    auto arr_it_end = arr.slice_end(axis);
+    for(; arr_it != arr_it_end; ++arr_it)
+        res.deep() += *arr_it;
+    
+    return res;
+}
+
+template<typename T>
+double mean(const Array<T>& arr)
+{
+    return std::accumulate(arr.begin(), arr.end(), 0) / static_cast<double>(arr.numElements());
+}
+
+template<typename T>
+Array<double> mean(const Array<T>& arr, int axis)
+{
+    return sum(arr, axis) / singleton(static_cast<double>(arr.shape()[axis]));
+}
 
 }
 

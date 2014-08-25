@@ -36,9 +36,7 @@ public:
         Array<T> arr = broadcast(rhs, this->shape());
         
         for(auto elems : zip(*this, arr))
-        {
             std::get<0>(elems) = std::get<1>(elems);
-        }
         
         return *this;
     }
@@ -49,6 +47,46 @@ public:
             x = rhs;
         
         // std::cout << "ASDF" << std::endl;
+        return *this;
+    }
+    
+    ArrayRef<T>& operator+=(const Array<T>& rhs)
+    {
+        Array<T> arr = broadcast(rhs, this->shape());
+        
+        for(auto elems : zip(*this, arr))
+            std::get<0>(elems) += std::get<1>(elems);
+        
+        return *this;
+    }
+    
+    ArrayRef<T>& operator-=(const Array<T>& rhs)
+    {
+        Array<T> arr = broadcast(rhs, this->shape());
+        
+        for(auto elems : zip(*this, arr))
+            std::get<0>(elems) -= std::get<1>(elems);
+        
+        return *this;
+    }
+    
+    ArrayRef<T>& operator*=(const Array<T>& rhs)
+    {
+        Array<T> arr = broadcast(rhs, this->shape());
+        
+        for(auto elems : zip(*this, arr))
+            std::get<0>(elems) *= std::get<1>(elems);
+        
+        return *this;
+    }
+    
+    ArrayRef<T>& operator/=(const Array<T>& rhs)
+    {
+        Array<T> arr = broadcast(rhs, this->shape());
+        
+        for(auto elems : zip(*this, arr))
+            std::get<0>(elems) /= std::get<1>(elems);
+        
         return *this;
     }
 };

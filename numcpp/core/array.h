@@ -30,6 +30,10 @@ public:
         : Super(core)
     {}
     
+    // Implicitely create a singleton array. This is a very special constructor.
+    // Maybe it should be removed.
+    Array(const T& value);
+    
     Array& operator=(const Array& rhs)
     {
         this->_data = rhs._data;

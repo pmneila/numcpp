@@ -16,15 +16,14 @@ inline std::vector<std::ptrdiff_t> contiguousStrides(const std::vector<size_t>& 
     std::vector<std::ptrdiff_t> strides(shape.size());
     
     auto strides_it = strides.rbegin();
-    *strides_it = elemSize;
-    ++strides_it;
-    
+    auto strides_it_end = strides.rend();
+    auto shape_it = shape.rbegin();
     int prod = elemSize;
     
-    for(auto shape_it = shape.rbegin(); strides_it != strides.rend(); ++shape_it, ++strides_it)
+    for(; strides_it != strides_it_end; ++shape_it, ++strides_it)
     {
-        prod *= *shape_it;
         *strides_it = prod;
+        prod *= *shape_it;
     }
     
     return strides;
@@ -64,6 +63,34 @@ Array<T> ones(const Shape& shape)
     res.deep() = T(1);
     return res;
 }
+
+template<typename Function>
+auto fromFunction(Function f, const Shape& shape)
+    -> Array<decltype(f(shape))>
+{
+    typedef decltype(f(shape)) T;
+    auto res = empty<T>(shape);
+    auto res_it = res.begin();
+    auto res_it_end = res.end();
+    for(; res_it != res_it_end; ++res_it)
+        *res_it = f(res_it.counter());
+    
+    return res;
+}
+
+template<typename T>
+Array<T> singleton(const T& value)
+{
+    auto res = empty<T>({});
+    res() = value;
+    return res;
+}
+
+template<typename T>
+Array<T>::Array(const T& value)
+    : Array(singleton<T>(value))
+{}
+
 
 template<typename T>
 Array<T> copy(const Array<T>& in)
