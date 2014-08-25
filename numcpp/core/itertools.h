@@ -20,43 +20,102 @@ namespace detail
     struct gen_seq<0, Is...> : seq<Is...> {};
     
     template<typename T, typename F, int... Is>
-    auto for_each(T& t, F f, seq<Is...>) -> decltype(std::make_tuple(f(std::get<Is>(t))...))
+    auto seq_map(const T& t, F f, seq<Is...>) -> decltype(std::make_tuple(f(std::get<Is>(t))...))
     {
         auto l = std::make_tuple(f(std::get<Is>(t))...);
         return l;
     }
     
     template<typename T, typename F, int... Is>
-    auto for_each(T& t1, T& t2, F f, seq<Is...>)
-        -> std::vector<decltype(f(std::get<0>(t1), std::get<0>(t2)))>
+    auto seq_map(const T& t1, const T& t2, F f, seq<Is...>)
+        -> decltype(std::make_tuple(f(std::get<Is>(t1), std::get<Is>(t2))...))
     {
-        return std::vector<bool>{f(std::get<Is>(t1), std::get<Is>(t2))...};
+        return std::make_tuple(f(std::get<Is>(t1), std::get<Is>(t2))...);
     }
     
     template<typename T, typename F, int... Is>
-    auto for_each_ref(T& t, F f, seq<Is...>) -> decltype(std::forward_as_tuple(f(std::get<Is>(t))...))
+    auto seq_map_ref(T& t, F f, seq<Is...>) -> decltype(std::forward_as_tuple(f(std::get<Is>(t))...))
     {
         auto l = std::forward_as_tuple(f(std::get<Is>(t))...);
         return l;
     }
     
     template<typename... Ts, typename F>
-    auto for_each_in_tuple(std::tuple<Ts...>& t, F f) -> decltype(for_each(t, f, gen_seq<sizeof...(Ts)>()))
+    auto tuple_map(const std::tuple<Ts...>& t, F f) -> decltype(seq_map(t, f, gen_seq<sizeof...(Ts)>()))
     {
-        return for_each(t, f, gen_seq<sizeof...(Ts)>());
+        return seq_map(t, f, gen_seq<sizeof...(Ts)>());
     }
     
     template<typename... Ts, typename F>
-    auto for_each_in_tuple(const std::tuple<Ts...>& t1, const std::tuple<Ts...>& t2, F f)
-        -> decltype(for_each(t1, t2, f, gen_seq<sizeof...(Ts)>()))
+    auto tuple_map(const std::tuple<Ts...>& t1, const std::tuple<Ts...>& t2, F f)
+        -> decltype(seq_map(t1, t2, f, gen_seq<sizeof...(Ts)>()))
     {
-        return for_each(t1, t2, f, gen_seq<sizeof...(Ts)>());
+        return seq_map(t1, t2, f, gen_seq<sizeof...(Ts)>());
     }
     
     template<typename... Ts, typename F>
-    auto for_each_in_tuple_ref(std::tuple<Ts...>& t, F f) -> decltype(for_each_ref(t, f, gen_seq<sizeof...(Ts)>()))
+    auto tuple_map_ref(std::tuple<Ts...>& t, F f) -> decltype(seq_map_ref(t, f, gen_seq<sizeof...(Ts)>()))
     {
-        return for_each_ref(t, f, gen_seq<sizeof...(Ts)>());
+        return seq_map_ref(t, f, gen_seq<sizeof...(Ts)>());
+    }
+    
+    template<typename T, typename F, int I, int... Is>
+    void seq_for_each(T& t, F f, seq<I, Is...>)
+    {
+        f(std::get<I>(t));
+        seq_for_each(t, f, seq<Is...>());
+    }
+    
+    template<typename T, typename F>
+    void seq_for_each(T& t, F f, seq<>)
+    {}
+    
+    template<typename... Ts, typename F>
+    void tuple_for_each(std::tuple<Ts...>& t, F f)
+    {
+        seq_for_each(t, f, gen_seq<sizeof...(Ts)>());
+    }
+    
+    template<typename T, int I, int... Is>
+    bool seq_any(const T& t, seq<I, Is...>)
+    {
+        if(std::get<I>(t))
+            return true;
+        
+        return seq_any(t, seq<Is...>());
+    }
+    
+    template<typename T>
+    bool seq_any(const T& t, seq<>)
+    {
+        return false;
+    }
+    
+    template<typename... Ts>
+    bool tuple_any(const std::tuple<Ts...>& t)
+    {
+        return seq_any(t, gen_seq<sizeof...(Ts)>());
+    }
+    
+    template<typename T, int I, int... Is>
+    bool seq_all(const T& t, seq<I, Is...>)
+    {
+        if(!std::get<I>(t))
+            return false;
+        
+        return seq_all(t, seq<Is...>());
+    }
+    
+    template<typename T>
+    bool seq_all(const T& t, seq<>)
+    {
+        return true;
+    }
+    
+    template<typename... Ts>
+    bool tuple_all(const std::tuple<Ts...>& t)
+    {
+        return seq_all(t, gen_seq<sizeof...(Ts)>());
     }
     
     struct begin_functor
@@ -80,10 +139,9 @@ namespace detail
     struct increment_functor
     {
         template<typename T>
-        int operator () (T& t)
+        void operator () (T& t)
         {
             ++t;
-            return 0;
         }
     };
     
@@ -133,32 +191,34 @@ public:
     
     ZipIterator& operator++()
     {
-        detail::for_each_in_tuple(_iterators, detail::increment_functor());
+        detail::tuple_for_each(_iterators, detail::increment_functor());
         return *this;
     }
     
     ZipIterator operator++(int)
     {
         ZipIterator aux(*this);
-        detail::for_each_in_tuple(_iterators, detail::increment_functor());
+        detail::tuple_for_each(_iterators, detail::increment_functor());
         return aux;
     }
     
-    auto operator*() -> decltype(detail::for_each_in_tuple_ref(this->_iterators, detail::dereference_functor()))
+    auto operator*() -> decltype(detail::tuple_map_ref(this->_iterators, detail::dereference_functor()))
     {
-        return detail::for_each_in_tuple_ref(_iterators, detail::dereference_functor());
+        return detail::tuple_map_ref(_iterators, detail::dereference_functor());
     }
     
     bool operator==(const ZipIterator& rhs)
     {
-        auto aux = detail::for_each_in_tuple(_iterators, rhs._iterators, detail::equal_functor());
-        return std::any_of(aux.begin(), aux.end(), [](bool v) -> bool {return v;});
+        return std::get<0>(_iterators) == std::get<0>(rhs._iterators);
+        // auto aux = detail::tuple_map(_iterators, rhs._iterators, detail::equal_functor());
+        // return detail::tuple_all(aux);
     }
     
     bool operator!=(const ZipIterator& rhs)
     {
-        auto aux = detail::for_each_in_tuple(_iterators, rhs._iterators, detail::notequal_functor());
-        return std::all_of(aux.begin(), aux.end(), [](bool v) -> bool {return v;});
+        return std::get<0>(_iterators) != std::get<0>(rhs._iterators);
+        // auto aux = detail::tuple_map(_iterators, rhs._iterators, detail::notequal_functor());
+        // return detail::tuple_any(aux);
     }
     
     const iterators_tuple& iterators() const {return _iterators;}
@@ -179,15 +239,15 @@ public:
         : _iterables(t)
     {}
     
-    auto begin() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::begin_functor()))>
+    auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
     {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::begin_functor());
+        auto aux = detail::tuple_map(_iterables, detail::begin_functor());
         return ZipIterator<decltype(aux)>(aux);
     }
     
-    auto end() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::end_functor()))>
+    auto end() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::end_functor()))>
     {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::end_functor());
+        auto aux = detail::tuple_map(_iterables, detail::end_functor());
         return ZipIterator<decltype(aux)>(aux);
     }
     
@@ -239,18 +299,18 @@ public:
     ArrayZip(const Shape& shape, const Array<T>&... arrays)
         : _iterables(arrays...)
     {
-        for_each_in_tuple(_iterables, detail::init_shape(shape));
+        tuple_for_each(_iterables, detail::init_shape(shape));
     }
     
-    auto begin() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::begin_functor()))>
+    auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
     {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::begin_functor());
+        auto aux = detail::tuple_map(_iterables, detail::begin_functor());
         return ZipIterator<decltype(aux)>(aux);
     }
     
-    auto end() -> ZipIterator<decltype(detail::for_each_in_tuple(this->_iterables, detail::end_functor()))>
+    auto end() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::end_functor()))>
     {
-        auto aux = detail::for_each_in_tuple(_iterables, detail::end_functor());
+        auto aux = detail::tuple_map(_iterables, detail::end_functor());
         return ZipIterator<decltype(aux)>(aux);
     }
     

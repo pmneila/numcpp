@@ -21,9 +21,9 @@ protected:
     explicit Manager() {}
     virtual ~Manager()
     {
-        // #ifndef NDEBUG
+        #ifndef NDEBUG
         std::cout << "Manager deleted" << std::endl;
-        // #endif
+        #endif
     }
 };
 

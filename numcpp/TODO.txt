@@ -14,5 +14,5 @@
 - Copy -- Done
 - Transpose -- Done
 - Reductions -- Done
-- Contiguous operator as a template parameter
-- zip iterator is TOO SLOW
+- Contiguous operator as a template parameter?
+- zip iterator is TOO SLOW -- Done

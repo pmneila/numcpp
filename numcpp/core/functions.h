@@ -36,48 +36,34 @@ template<typename T1, typename T2>
 auto operator+(const Array<T1>& arr1, const Array<T2>& arr2)
     -> Array<decltype(T1() + T2())>
 {
-    typedef decltype(T1() + T2()) TR;
+    // typedef decltype(T1() + T2()) TR;
     
-    auto az = array_zip(Array<TR>(), arr1, arr2);
-    for(auto el : az)
-        std::get<0>(el) = std::get<1>(el) + std::get<2>(el);
-    return std::get<0>(az.iterables());
+    // auto az = array_zip(Array<TR>(), arr1, arr2);
+    // for(auto el : az)
+    //     std::get<0>(el) = std::get<1>(el) + std::get<2>(el);
+    // return std::get<0>(az.iterables());
+    return array_map([](const T1& a, const T2& b){return a+b;}, arr1, arr2);
 }
 
 template<typename T1, typename T2>
 auto operator-(const Array<T1>& arr1, const Array<T2>& arr2)
     -> Array<decltype(T1() - T2())>
 {
-    typedef decltype(T1() - T2()) TR;
-    
-    auto az = array_zip(Array<TR>(), arr1, arr2);
-    for(auto el : az)
-        std::get<0>(el) = std::get<1>(el) - std::get<2>(el);
-    return std::get<0>(az.iterables());
+    return array_map([](const T1& a, const T2& b){return a-b;}, arr1, arr2);
 }
 
 template<typename T1, typename T2>
 auto operator*(const Array<T1>& arr1, const Array<T2>& arr2)
     -> Array<decltype(T1() * T2())>
 {
-    typedef decltype(T1() * T2()) TR;
-    
-    auto az = array_zip(Array<TR>(), arr1, arr2);
-    for(auto el : az)
-        std::get<0>(el) = std::get<1>(el) * std::get<2>(el);
-    return std::get<0>(az.iterables());
+    return array_map([](const T1& a, const T2& b){return a*b;}, arr1, arr2);
 }
 
 template<typename T1, typename T2>
 auto operator/(const Array<T1>& arr1, const Array<T2>& arr2)
     -> Array<decltype(T1() / T2())>
 {
-    typedef decltype(T1() / T2()) TR;
-    
-    auto az = array_zip(Array<TR>(), arr1, arr2);
-    for(auto el : az)
-        std::get<0>(el) = std::get<1>(el) / std::get<2>(el);
-    return std::get<0>(az.iterables());
+    return array_map([](const T1& a, const T2& b){return a/b;}, arr1, arr2);
 }
 
 template<typename T1, typename T2>

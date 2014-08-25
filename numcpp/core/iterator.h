@@ -9,6 +9,8 @@ template<typename T>
 class Iterator
 {
 protected:
+    
+    
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
         : _core(array.core())
@@ -16,11 +18,15 @@ protected:
         , _counter(_core.ndims(), 0)
         , _pointer_end(nullptr)
         , _pointer(reinterpret_cast<unsigned char*>(_core.data() + _core.offset()))
-    {}
+        , _contiguous(array.isContiguous())
+    {
+        if(_contiguous)
+            _pointer_end = reinterpret_cast<unsigned char*>(array.data() + array.offset() + array.numElements());
+    }
     
     template<typename S, typename Derived>
     friend class ArrayBase;
-    
+        
 public:
     typedef T value_type;
     typedef T& reference;
@@ -34,6 +40,7 @@ public:
         , _counter(rhs._counter)
         , _pointer_end(rhs._pointer_end)
         , _pointer(rhs._pointer)
+        , _contiguous(rhs._contiguous)
     {}
     
     Iterator& operator=(const Iterator& rhs)
@@ -43,10 +50,17 @@ public:
         _counter = rhs._counter;
         _pointer = rhs._pointer;
         _pointer_end = rhs._pointer_end;
+        _contiguous = rhs._contiguous;
     }
     
     Iterator& operator++()
     {
+        if(_contiguous)
+        {
+            _pointer += sizeof(T);
+            return *this;
+        }
+        
         int i;
         for(i=_core.ndims()-1; i>=0; --i)
         {
@@ -101,8 +115,9 @@ private:
     const ArrayCore& _core;
     Strides _seq_strides;
     Shape _counter;
-    unsigned char* const _pointer_end;
+    unsigned char* _pointer_end;
     unsigned char* _pointer;
+    bool _contiguous;
 };
 
 template<typename T, typename Derived>
