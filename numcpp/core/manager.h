@@ -19,7 +19,12 @@ public:
     
 protected:
     explicit Manager() {}
-    virtual ~Manager() {std::cout << "Manager deleted" << std::endl;}
+    virtual ~Manager()
+    {
+        // #ifndef NDEBUG
+        std::cout << "Manager deleted" << std::endl;
+        // #endif
+    }
 };
 
 class SimpleManager : public Manager

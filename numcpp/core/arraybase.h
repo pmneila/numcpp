@@ -45,6 +45,7 @@ public:
     typedef Iterator<DT> iterator;
     typedef Iterator<const DT> const_iterator;
     typedef SliceIterator<DT, Derived> slice_iterator;
+    typedef DT* contiguous_iterator;
     
     DT& operator()() const
     {
@@ -139,6 +140,22 @@ public:
     
     slice_iterator slice_begin(int axis) const;
     slice_iterator slice_end(int axis) const;
+    
+    contiguous_iterator cont_begin() const
+    {
+        if(!isContiguous())
+            throw std::invalid_argument("cannot create a contiguous_iterator; array is not contiguous");
+        
+        return data() + offset();
+    }
+    
+    contiguous_iterator cont_end() const
+    {
+        if(!isContiguous())
+            throw std::invalid_argument("cannot create a contiguous_iterator; array is not contiguous");
+        
+        return data() + offset() + numElements();
+    }
     
     int numElements() const {return _core.numElements();}
     const Shape& shape() const {return _core.shape();}

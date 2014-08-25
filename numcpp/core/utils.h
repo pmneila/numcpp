@@ -8,6 +8,7 @@
 #include <chrono>
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 
 namespace numcpp
 {

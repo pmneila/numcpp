@@ -6,7 +6,7 @@
 - Manager with external data -- Done
 - squeeze -- Done
 - Indexing with creation of new axes -- Done
-- Contiguous iterator?
+- Contiguous iterator -- Done
 - Sliced iterator -- Done
 - Concatenate and stack arrays
 - Type casting -- Done
@@ -14,3 +14,5 @@
 - Copy -- Done
 - Transpose -- Done
 - Reductions -- Done
+- Contiguous operator as a template parameter
+- zip iterator is TOO SLOW
