@@ -16,3 +16,4 @@
 - Reductions -- Done
 - Contiguous operator as a template parameter?
 - zip iterator is TOO SLOW -- Done
+- Inner loop iteration
