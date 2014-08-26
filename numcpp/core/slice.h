@@ -126,6 +126,7 @@ private:
 };
 
 const Slice full;
+const SliceElem none;
 
 using slice = Slice;
 using S = Slice;

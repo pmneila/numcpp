@@ -16,6 +16,12 @@ namespace detail
     {
         return f(std::get<Is>(tuple)...);
     }
+    
+    struct isContiguous
+    {
+        template<typename T>
+        bool operator()(const Array<T>& arr) {return arr.isContiguous();}
+    };
 }
 
 // Maps
@@ -26,10 +32,24 @@ auto array_map(Function&& f, const Array<T>&... arr)
     typedef decltype(f(T()...)) TR;
     constexpr int V = sizeof...(T);
     
-    auto az = array_zip(arr..., Array<TR>());
-    for(auto el : az)
-        std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
-    return std::get<V>(az.iterables());
+    auto contiguous = detail::tuple_map(std::make_tuple(arr...),
+        detail::isContiguous());
+    if(detail::tuple_all(contiguous))
+    {
+        // If all arrays are contiguous, use contiguous iterators.
+        auto caz = contiguous_array_zip(arr..., Array<TR>());
+        for(auto el : caz)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(caz.iterables());
+    }
+    else
+    {
+        // Otherwise, use the more general, slower iterators.
+        auto az = array_zip(arr..., Array<TR>());
+        for(auto el : az)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(az.iterables());
+    }
 }
 
 template<typename T1, typename T2>

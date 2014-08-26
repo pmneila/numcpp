@@ -136,6 +136,24 @@ namespace detail
         }
     };
     
+    struct cont_begin_functor
+    {
+        template<typename T>
+        auto operator () (T& t) -> decltype(t.cont_begin())
+        {
+            return t.cont_begin();
+        }
+    };
+    
+    struct cont_end_functor
+    {
+        template<typename T>
+        auto operator () (T& t) -> decltype(t.cont_end())
+        {
+            return t.cont_end();
+        }
+    };
+    
     struct increment_functor
     {
         template<typename T>
@@ -323,6 +341,50 @@ ArrayZip<T...> array_zip(const Array<T>&... arr)
     Shape bshape = broadcastShapes({arr.shape()...});
     
     return ArrayZip<T...>(bshape, broadcast(arr, bshape)...);
+}
+
+template<typename... T>
+class ContiguousArrayZip
+{
+public:
+    typedef std::tuple<Array<T>...> iterable_tuple;
+    
+protected:
+    iterable_tuple _iterables;
+    
+public:
+    ContiguousArrayZip(const Shape& shape, const Array<T>&... arrays)
+        : _iterables(arrays...)
+    {
+        tuple_for_each(_iterables, detail::init_shape(shape));
+    }
+    
+    auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::cont_begin_functor()))>
+    {
+        auto aux = detail::tuple_map(_iterables, detail::cont_begin_functor());
+        return ZipIterator<decltype(aux)>(aux);
+    }
+    
+    auto end() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::cont_end_functor()))>
+    {
+        auto aux = detail::tuple_map(_iterables, detail::cont_end_functor());
+        return ZipIterator<decltype(aux)>(aux);
+    }
+    
+    const iterable_tuple& iterables() const {return _iterables;}
+};
+
+template<typename... T>
+ContiguousArrayZip<T...> contiguous_array_zip(const Array<T>&... arr)
+{
+    // No broadcasting for contiguous iterators.
+    
+    // Check if all arrays have the same shape.
+    #ifndef NDEBUG
+    
+    #endif
+    
+    return ContiguousArrayZip<T...>(bshape, arr...);
 }
 
 }

@@ -16,4 +16,6 @@
 - Reductions -- Done
 - Contiguous operator as a template parameter?
 - zip iterator is TOO SLOW -- Done
-- Inner loop iteration
+- Inner loop iteration -- Done
+- ArrayZip with only empty arrays fails
+- Check if arrays have same shape before creating a contiguous array zip

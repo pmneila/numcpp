@@ -10,18 +10,17 @@ class Iterator
 {
 protected:
     
-    
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
         : _core(array.core())
+        , _pointer(reinterpret_cast<unsigned char*>(_core.data() + _core.offset()))
+        // , _outerAxes(_core.ndims())
         , _seq_strides(seqStrides(_core.shape(), _core.strides()))
         , _counter(_core.ndims(), 0)
-        , _pointer_end(nullptr)
-        , _pointer(reinterpret_cast<unsigned char*>(_core.data() + _core.offset()))
-        , _contiguous(array.isContiguous())
     {
-        if(_contiguous)
-            _pointer_end = reinterpret_cast<unsigned char*>(array.data() + array.offset() + array.numElements());
+        std::tie(_outerAxes, _innerStep, _innerSize) = array.getInnerLoopAxisAndStep();
+        _innerEnd = _pointer + _innerSize;
+        _pointerEnd = nullptr;
     }
     
     template<typename S, typename Derived>
@@ -36,33 +35,42 @@ public:
     
     Iterator(const Iterator& rhs)
         : _core(rhs._core)
+        , _pointer(rhs._pointer)
+        , _pointerEnd(rhs._pointerEnd)
+        , _outerAxes(rhs._outerAxes)
         , _seq_strides(rhs._seq_strides)
         , _counter(rhs._counter)
-        , _pointer_end(rhs._pointer_end)
-        , _pointer(rhs._pointer)
-        , _contiguous(rhs._contiguous)
+        , _innerStep(rhs._innerStep)
+        , _innerSize(rhs._innerSize)
+        , _innerEnd(rhs._innerEnd)
     {}
     
     Iterator& operator=(const Iterator& rhs)
     {
         _core = rhs._core;
+        _pointer = rhs._pointer;
+        _pointerEnd = rhs._pointerEnd;
+        _outerAxes = rhs._outerAxes;
         _seq_strides = rhs._seq_strides;
         _counter = rhs._counter;
-        _pointer = rhs._pointer;
-        _pointer_end = rhs._pointer_end;
-        _contiguous = rhs._contiguous;
+        _innerStep = rhs._innerStep;
+        _innerSize = rhs._innerSize;
+        _innerEnd = rhs._innerEnd;
     }
     
     Iterator& operator++()
     {
-        if(_contiguous)
-        {
-            _pointer += sizeof(T);
-            return *this;
-        }
+        _pointer += _innerStep;
+        if(_pointer == _innerEnd)
+            outer_step();
         
+        return *this;
+    }
+    
+    void outer_step()
+    {
         int i;
-        for(i=_core.ndims()-1; i>=0; --i)
+        for(i=_outerAxes-1; i>=0; --i)
         {
             _pointer += _seq_strides[i];
             if(_counter[i] < _core.shape()[i] - 1)
@@ -75,9 +83,9 @@ public:
         }
         
         if(i==-1)
-            _pointer = _pointer_end;
+            _pointer = _pointerEnd;
         
-        return *this;
+        _innerEnd = _pointer + _innerSize;
     }
     
     Iterator operator++(int)
@@ -103,7 +111,7 @@ public:
     
     void goToEnd()
     {
-        _pointer = _pointer_end;
+        _pointer = _pointerEnd;
     }
     
     /// Undefined when the iterator is at end
@@ -113,11 +121,18 @@ public:
     
 private:
     const ArrayCore& _core;
+    unsigned char* _pointer;
+    unsigned char* _pointerEnd;
+    
+    // Outer loop variables
+    int _outerAxes;
     Strides _seq_strides;
     Shape _counter;
-    unsigned char* _pointer_end;
-    unsigned char* _pointer;
-    bool _contiguous;
+    
+    // Inner loop variables
+    int _innerStep;
+    int _innerSize;
+    unsigned char* _innerEnd;
 };
 
 template<typename T, typename Derived>
