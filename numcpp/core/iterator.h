@@ -21,6 +21,9 @@ protected:
         std::tie(_outerAxes, _innerStep, _innerSize) = array.getInnerLoopAxisAndStep();
         _innerEnd = _pointer + _innerSize;
         _pointerEnd = nullptr;
+        
+        if(_core.numElements() == 0)
+            _pointer = _pointerEnd;
     }
     
     template<typename S, typename Derived>

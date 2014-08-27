@@ -82,6 +82,9 @@ Strides seqStrides(const Shape& shape, const Strides& strides)
     std::transform(shape.begin(), shape.end(), strides.begin(), prod.begin(),
         std::multiplies<Strides::value_type>());
     
+    if(res.size() == 0)
+        return res;
+    
     std::transform(res.begin(), res.end()-1, prod.begin()+1, res.begin(),
         std::minus<Strides::value_type>());
     

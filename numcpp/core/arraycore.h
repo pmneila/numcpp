@@ -71,7 +71,7 @@ public:
         return _offset + std::inner_product(index.begin(), index.end(), _strides.begin(), 0);
     }
     
-    bool isEmpty() const
+    bool isNull() const
     {
         return !(bool)_manager;
     }

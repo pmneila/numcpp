@@ -5,6 +5,8 @@
 #include <tuple>
 #include <type_traits>
 
+#include "ostream.h"
+
 namespace numcpp
 {
 
@@ -60,18 +62,19 @@ namespace detail
     }
     
     template<typename T, typename F, int I, int... Is>
-    void seq_for_each(T& t, F f, seq<I, Is...>)
+    void seq_for_each(T& t, F&& f, seq<I, Is...>)
     {
         f(std::get<I>(t));
         seq_for_each(t, f, seq<Is...>());
     }
     
     template<typename T, typename F>
-    void seq_for_each(T& t, F f, seq<>)
+    void seq_for_each(T& t, F&& f, seq<>)
     {}
     
     template<typename... Ts, typename F>
-    void tuple_for_each(std::tuple<Ts...>& t, F f)
+    
+    void tuple_for_each(std::tuple<Ts...>& t, F&& f)
     {
         seq_for_each(t, f, gen_seq<sizeof...(Ts)>());
     }
@@ -292,13 +295,35 @@ namespace detail
         {}
         
         template<typename T>
-        int operator () (Array<T>& t)
+        void operator () (Array<T>& t)
         {
-            if(t.isEmpty())
-            {
+            if(t.isNull())
                 t = empty<T>(_shape);
-            }
-            return 0;
+            
+            if(t.shape() != _shape)
+                throw std::invalid_argument("arrays in array_zip do not have the same shape");
+        }
+    };
+    
+    struct common_shape
+    {
+        Shape _shape;
+        
+        template<typename T>
+        void operator() (Array<T>& t)
+        {
+            if(!t.isNull())
+                _shape = t.shape();
+        }
+    };
+    
+    struct forceContiguous
+    {
+        template<typename T>
+        void operator()(const Array<T>& arr)
+        {
+            if(!arr.isContiguous())
+                throw std::invalid_argument("arrays in contiguous_array_zip must be contiguous");
         }
     };
 };
@@ -314,10 +339,16 @@ protected:
     iterable_tuple _iterables;
     
 public:
-    ArrayZip(const Shape& shape, const Array<T>&... arrays)
+    ArrayZip(const Array<T>&... arrays)
         : _iterables(arrays...)
     {
-        tuple_for_each(_iterables, detail::init_shape(shape));
+        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
+    }
+    
+    ArrayZip(const std::tuple<Array<T>...>& arrays)
+        : _iterables(arrays)
+    {
+        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
     }
     
     auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
@@ -339,8 +370,10 @@ template<typename... T>
 ArrayZip<T...> array_zip(const Array<T>&... arr)
 {
     Shape bshape = broadcastShapes({arr.shape()...});
+    auto arrays = std::make_tuple(broadcast(arr, bshape)...);
+    detail::tuple_for_each(arrays, detail::init_shape(bshape));
     
-    return ArrayZip<T...>(bshape, broadcast(arr, bshape)...);
+    return ArrayZip<T...>(arrays);
 }
 
 template<typename... T>
@@ -353,10 +386,14 @@ protected:
     iterable_tuple _iterables;
     
 public:
-    ContiguousArrayZip(const Shape& shape, const Array<T>&... arrays)
+    ContiguousArrayZip(const Array<T>&... arrays)
         : _iterables(arrays...)
+    {}
+    
+    ContiguousArrayZip(const std::tuple<Array<T>...>& arrays)
+        : _iterables(arrays)
     {
-        tuple_for_each(_iterables, detail::init_shape(shape));
+        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
     }
     
     auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::cont_begin_functor()))>
@@ -377,14 +414,16 @@ public:
 template<typename... T>
 ContiguousArrayZip<T...> contiguous_array_zip(const Array<T>&... arr)
 {
-    // No broadcasting for contiguous iterators.
+    auto arrays = std::make_tuple(arr...);
     
-    // Check if all arrays have the same shape.
-    #ifndef NDEBUG
+    // Check that arrays are contiguous.
+    detail::tuple_for_each(arrays, detail::forceContiguous());
     
-    #endif
+    detail::common_shape cs;
+    detail::tuple_for_each(arrays, cs);
+    detail::tuple_for_each(arrays, detail::init_shape(cs._shape));
     
-    return ContiguousArrayZip<T...>(bshape, arr...);
+    return ContiguousArrayZip<T...>(arrays);
 }
 
 }

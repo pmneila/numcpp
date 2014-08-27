@@ -162,7 +162,7 @@ public:
     const Strides& strides() const {return _core.strides();}
     int ndims() const {return _core.ndims();}
     Manager::Ptr manager() const {return _core.manager();}
-    bool isEmpty() const {return _core.isEmpty();}
+    bool isNull() const {return _core.isNull();}
     
     DT* data() const {return reinterpret_cast<DT*>(_data);}
     std::ptrdiff_t offset() const {return _core.offset();}
