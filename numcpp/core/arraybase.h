@@ -53,6 +53,13 @@ public:
         return *reinterpret_cast<DT*>(_data + offset);
     }
     
+    template<typename... Is>
+    DT& operator()(Is... is) const
+    {
+        std::ptrdiff_t offset = _core.offset(is...);
+        return *reinterpret_cast<DT*>(_data + offset);
+    }
+    
     DT& operator()(const std::vector<size_t>& index) const
     {
         std::ptrdiff_t offset = _core.offset(index);

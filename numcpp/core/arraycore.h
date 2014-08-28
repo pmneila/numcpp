@@ -53,6 +53,7 @@ public:
     
     unsigned char* data() const {return (bool)_manager ? _manager->data() : 0;}
     
+    template<int Index=0>
     std::ptrdiff_t offset() const {return _offset;}
     
     std::ptrdiff_t offset(const std::vector<size_t>& index) const
@@ -69,6 +70,12 @@ public:
         #endif
         
         return _offset + std::inner_product(index.begin(), index.end(), _strides.begin(), 0);
+    }
+    
+    template<int Index=0, typename... Is>
+    std::ptrdiff_t offset(int i, Is... is) const
+    {
+        return i*_strides[Index] + offset<Index+1>(is...);
     }
     
     bool isNull() const
