@@ -314,12 +314,6 @@ namespace detail
             : _index(index)
         {}
         
-        // template<typename T, int... Is>
-        // T& index_array(const Array<T>& arr, seq<Is...>)
-        // {
-        //     return arr.operator()(_index[Is]...);
-        // }
-        
         template<typename T>
         T& operator()(const Array<T>& arr)
         {
@@ -330,10 +324,6 @@ namespace detail
     template<size_t NDims, int N, int... Is>
     struct gen_IndexArrayWithStdArray : public gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>
     {
-        // gen_IndexArrayWithStdArray(const std::array<size_t, NDims>& index)
-        //     : gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>(index)
-        // {}
-        
         using gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>::gen_IndexArrayWithStdArray;
     };
     

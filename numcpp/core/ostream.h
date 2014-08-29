@@ -2,10 +2,7 @@
 #ifndef NUMCPP_OSTREAM_H
 #define NUMCPP_OSTREAM_H
 
-namespace numcpp
-{
-
-std::ostream& operator<< (std::ostream& os, const Shape& x)
+std::ostream& operator<< (std::ostream& os, const numcpp::Shape& x)
 {
     os << "(";
     for(auto& y: x)
@@ -14,7 +11,7 @@ std::ostream& operator<< (std::ostream& os, const Shape& x)
     return os;
 }
 
-std::ostream& operator<< (std::ostream& os, const Strides& x)
+std::ostream& operator<< (std::ostream& os, const numcpp::Strides& x)
 {
     os << "(";
     for(auto& y: x)
@@ -33,7 +30,7 @@ std::ostream& operator<< (std::ostream& os, const std::vector<T>& x)
     return os;
 }
 
-std::ostream& operator<< (std::ostream& os, const Index& x)
+std::ostream& operator<< (std::ostream& os, const numcpp::Index& x)
 {
     static const std::vector<std::string> names = {"INT, SLICE, NEWAXIS"};
     os << "(";
@@ -54,7 +51,7 @@ std::ostream& operator<< (std::ostream& os, const Index& x)
 }
 
 template<class T, class Derived>
-std::ostream& operator<< (std::ostream& os, const ArrayBase<T, Derived>& x)
+std::ostream& operator<< (std::ostream& os, const numcpp::ArrayBase<T, Derived>& x)
 {
     os << "Array<" << typeid(T).name() << "> {\n";
     os << "  ndims = " << x.ndims() << "\n";
@@ -73,8 +70,6 @@ std::ostream& operator<< (std::ostream& os, const ArrayBase<T, Derived>& x)
     // }
     os << "}";
     return os;
-}
-
 }
 
 #endif
