@@ -198,10 +198,10 @@ public:
     
     std::tuple<int,int,int> getInnerLoopAxisAndStep() const
     {
-        int axis = ndims();
+        int axis = ndims() - 1;
         
-        if(axis == 0)
-            return std::make_tuple(0, 0, 0);
+        if(axis == -1)
+            return std::make_tuple(-1, 0, 0);
         
         auto strides_it = strides().rbegin();
         size_t value = *strides_it;
@@ -220,7 +220,7 @@ public:
             value *= *shape_it;
         }
         
-        return std::make_tuple(0, step, value);
+        return std::make_tuple(axis, step, value);
     }
 };
 

@@ -73,7 +73,7 @@ public:
     void outer_step()
     {
         int i;
-        for(i=_outerAxes-1; i>=0; --i)
+        for(i=_outerAxes; i>=0; --i)
         {
             _pointer += _seq_strides[i];
             if(_counter[i] < _core.shape()[i] - 1)
