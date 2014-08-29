@@ -75,7 +75,26 @@ public:
     template<int Index=0, typename... Is>
     std::ptrdiff_t offset(int i, Is... is) const
     {
+        #ifndef NDEBUG
+        if(Index > ndims())
+            throw std::invalid_argument("array indexed with too many indices");
+        #endif
+        
         return i*_strides[Index] + offset<Index+1>(is...);
+    }
+    
+    template<size_t NDims>
+    std::ptrdiff_t offset(const std::array<size_t, NDims>& index) const
+    {
+        #ifndef NDEBUG
+        if(Index > ndims())
+            throw std::invalid_argument("array indexed with too many indices");
+        #endif
+        
+        std::ptrdiff_t res = _offset;
+        for(int i = 0; i < NDims; ++i)
+            res += index[i]*_strides[i];
+        return res;
     }
     
     bool isNull() const

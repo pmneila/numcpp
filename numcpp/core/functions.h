@@ -26,34 +26,53 @@ auto array_map(Function&& f, const Array<T>&... arr)
     typedef decltype(f(T()...)) TR;
     constexpr int V = sizeof...(T);
     
-    // If all arrays are contiguous, use contiguous iterators.
-    // try
-    // {
-    //     auto caz = contiguous_array_zip(arr..., Array<TR>());
-    //     for(auto el : caz)
-    //         std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
-    //     return std::get<V>(caz.iterables());
-    // }
-    // catch(...)
-    // {
-        // Otherwise, use the more general, slower iterators.
-        auto az = array_zip(arr..., Array<TR>());
+    auto all_ndims = std::vector<int>({arr.ndims()...});
+    int max_ndims = *std::max_element(all_ndims.begin(), all_ndims.end());
+    
+    switch(max_ndims)
+    {
+    case 1:
+    {
+        auto az = array_zip<1>(arr..., Array<TR>());
         for(auto el : az)
             std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
         return std::get<V>(az.iterables());
-    // }
+    }
+    case 2:
+    {
+        auto az = array_zip<2>(arr..., Array<TR>());
+        for(auto el : az)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(az.iterables());
+    }
+    case 3:
+    {
+        auto az = array_zip<3>(arr..., Array<TR>());
+        for(auto el : az)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(az.iterables());
+    }
+    case 4:
+    {
+        auto az = array_zip<4>(arr..., Array<TR>());
+        for(auto el : az)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(az.iterables());
+    }
+    default:
+    {
+        auto az = array_zip<-1>(arr..., Array<TR>());
+        for(auto el : az)
+            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+        return std::get<V>(az.iterables());
+    }
+    }
 }
 
 template<typename T1, typename T2>
 auto operator+(const Array<T1>& arr1, const Array<T2>& arr2)
     -> Array<decltype(T1() + T2())>
 {
-    // typedef decltype(T1() + T2()) TR;
-    
-    // auto az = array_zip(Array<TR>(), arr1, arr2);
-    // for(auto el : az)
-    //     std::get<0>(el) = std::get<1>(el) + std::get<2>(el);
-    // return std::get<0>(az.iterables());
     return array_map([](const T1& a, const T2& b){return a+b;}, arr1, arr2);
 }
 

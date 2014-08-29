@@ -305,46 +305,46 @@ namespace detail
         }
     };
     
-    struct common_shape
+    template<size_t NDims, int... Is>
+    struct IndexArrayWithStdArray
     {
-        Shape _shape;
+        const std::array<size_t, NDims> _index;
         
-        template<typename T>
-        void operator() (Array<T>& t)
-        {
-            if(!t.isNull())
-                _shape = t.shape();
-        }
-    };
-    
-    struct forceContiguous
-    {
-        template<typename T>
-        void operator()(const Array<T>& arr)
-        {
-            if(!arr.isContiguous())
-                throw std::invalid_argument("arrays in contiguous_array_zip must be contiguous");
-        }
-    };
-    
-    template<int NDims>
-    struct IndexArrayVector
-    {
-        const std::array<size_t, NDims>& _index;
-        
-        IndexArrayVector(const std::array<size_t, NDims>& index)
+        IndexArrayWithStdArray(const std::array<size_t, NDims>& index)
             : _index(index)
         {}
+        
+        // template<typename T, int... Is>
+        // T& index_array(const Array<T>& arr, seq<Is...>)
+        // {
+        //     return arr.operator()(_index[Is]...);
+        // }
         
         template<typename T>
         T& operator()(const Array<T>& arr)
         {
-            return arr(_index[0], _index[1]);
+            return arr(_index[Is]...);
         }
+    };
+    
+    template<size_t NDims, int N, int... Is>
+    struct gen_IndexArrayWithStdArray : public gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>
+    {
+        // gen_IndexArrayWithStdArray(const std::array<size_t, NDims>& index)
+        //     : gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>(index)
+        // {}
+        
+        using gen_IndexArrayWithStdArray<NDims, N-1, N-1, Is...>::gen_IndexArrayWithStdArray;
+    };
+    
+    template<size_t NDims, int... Is>
+    struct gen_IndexArrayWithStdArray<NDims, 0, Is...> : public IndexArrayWithStdArray<NDims, Is...>
+    {
+        using IndexArrayWithStdArray<NDims, Is...>::IndexArrayWithStdArray;
     };
 };
 
-template<int NDims, typename... T>
+template<size_t NDims, typename... T>
 class ArrayZipIterator
 {
 public:
@@ -409,7 +409,7 @@ public:
     
     std::tuple<T&...> operator*()
     {
-        return tuple_map_ref(_arrays, detail::IndexArrayVector<NDims>(_index));
+        return tuple_map_ref(_arrays, detail::gen_IndexArrayWithStdArray<NDims, NDims>(_index));
     }
     
     bool operator==(const ArrayZipIterator& rhs)
@@ -439,104 +439,169 @@ public:
     }
 };
 
+// template<typename... T>
+// class ArrayZipIterator<-1, T...>
+// {
+// public:
+//     typedef std::tuple<const Array<T>&...> array_tuple;
+    
+// private:
+//     array_tuple _arrays;
+//     Shape _shape;
+//     int _ndims;
+//     Shape _index;
+    
+// public:
+//     ArrayZipIterator(const array_tuple& arrays)
+//         : _arrays(arrays)
+//         , _shape(std::get<0>(_arrays).shape())
+//         , _ndims(_shape.size())
+//         , _index(_ndims, 0)
+//     {
+//     }
+    
+//     ArrayZipIterator(const ArrayZipIterator& rhs)
+//         : _arrays(rhs._arrays)
+//         , _shape(rhs._shape)
+//         , _ndims(rhs._ndims)
+//         , _index(rhs._index)
+//     {
+//     }
+    
+//     ArrayZipIterator& operator=(const ArrayZipIterator& rhs)
+//     {
+//         _arrays = rhs._arrays;
+//         _shape = rhs._shape;
+//         _ndims = rhs._ndims;
+//         _index = rhs._index;
+//         return *this;
+//     }
+    
+//     ArrayZipIterator& operator++()
+//     {
+//         int i = _ndims - 1;
+//         for(; i > 0; --i)
+//         {
+//             ++_index[i];
+//             if(_index[i] >= _shape[i])
+//                 _index[i] = 0;
+//             else
+//                 break;
+//         }
+        
+//         if(i==0)
+//             ++_index[0];
+        
+//         return *this;
+//     }
+    
+//     ArrayZipIterator& operator++(int)
+//     {
+//         ArrayZipIterator<T...> aux(*this);
+//         ++(*this);
+//         return *this;
+//     }
+    
+//     std::tuple<T&...> operator*()
+//     {
+//         return tuple_map_ref(_arrays, detail::IndexArrayWithVector(_index));
+//     }
+    
+//     bool operator==(const ArrayZipIterator& rhs)
+//     {
+//         for(int i = 0; i < _ndims; ++i)
+//         {
+//             if(_index[i] != rhs._index[i])
+//                 return false;
+//         }
+//         return true;
+//     }
+
+//     bool operator!=(const ArrayZipIterator& rhs)
+//     {
+//         for(int i = 0; i < _ndims; ++i)
+//         {
+//             if(_index[i] != rhs._index[i])
+//                 return true;
+//         }
+//         return false;
+//     }
+    
+//     void goToEnd()
+//     {
+//         std::fill(_index.begin(), _index.end(), 0);
+//         _index[0] = _shape[0];
+//     }
+// };
+
+// General ArrayZipIterator for any number of dimensions
+template<typename... T>
+class ArrayZipIterator<-1, T...> : public ZipIterator<std::tuple<typename Array<T>::iterator...>>
+{
+public:
+    typedef ZipIterator<std::tuple<typename Array<T>::iterator...>> base;
+    typedef std::tuple<const Array<T>&...> array_tuple;
+    
+protected:
+    array_tuple _arrays;
+    
+public:
+    
+    ArrayZipIterator(const array_tuple& arrays)
+        : base(detail::tuple_map(arrays, detail::begin_functor()))
+        , _arrays(arrays)
+    {}
+    
+    void goToEnd()
+    {
+        this->_iterators = detail::tuple_map(_arrays, detail::end_functor());
+    }
+};
+
 // Similar to Zip, but ArrayZip holds the iterables, not just references.
-template<int NDims, typename... T>
+template<size_t NDims, typename... T>
 class ArrayZip
 {
 public:
-    typedef std::tuple<Array<T>...> iterable_tuple;
+    typedef std::tuple<Array<T>...> array_tuple;
     
 protected:
-    iterable_tuple _iterables;
+    array_tuple _arrays;
     
 public:
     ArrayZip(const Array<T>&... arrays)
-        : _iterables(arrays...)
+        : _arrays(arrays...)
     {
-        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
     }
     
     ArrayZip(const std::tuple<Array<T>...>& arrays)
-        : _iterables(arrays)
+        : _arrays(arrays)
+    {}
+    
+    ArrayZipIterator<NDims, T...> begin()
     {
-        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
+       return ArrayZipIterator<NDims, T...>(_arrays);
     }
     
-    ArrayZipIterator<NDims, T...> begin() // -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
+    ArrayZipIterator<NDims, T...> end()
     {
-        return ArrayZipIterator<NDims, T...>(_iterables);
-    }
-    
-    ArrayZipIterator<NDims, T...> end() // -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::end_functor()))>
-    {
-        ArrayZipIterator<NDims, T...> it(_iterables);
-        
+        ArrayZipIterator<NDims, T...> it(_arrays);
         it.goToEnd();
-        
         return it;
     }
     
-    const iterable_tuple& iterables() const {return _iterables;}
+    const array_tuple& iterables() const {return _arrays;}
+    const array_tuple& arrays() const {return _arrays;}
 };
 
-template<typename... T>
-ArrayZip<2, T...> array_zip(const Array<T>&... arr)
+template<size_t NDims=-1, typename... T>
+ArrayZip<NDims, T...> array_zip(const Array<T>&... arr)
 {
     Shape bshape = broadcastShapes({arr.shape()...});
     auto arrays = std::make_tuple(broadcast(arr, bshape)...);
     detail::tuple_for_each(arrays, detail::init_shape(bshape));
     
-    return ArrayZip<2, T...>(arrays);
-}
-
-template<typename... T>
-class ContiguousArrayZip
-{
-public:
-    typedef std::tuple<Array<T>...> iterable_tuple;
-    
-protected:
-    iterable_tuple _iterables;
-    
-public:
-    ContiguousArrayZip(const Array<T>&... arrays)
-        : _iterables(arrays...)
-    {}
-    
-    ContiguousArrayZip(const std::tuple<Array<T>...>& arrays)
-        : _iterables(arrays)
-    {
-        //detail::tuple_for_each(_iterables, detail::init_shape(shape));
-    }
-    
-    auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::cont_begin_functor()))>
-    {
-        auto aux = detail::tuple_map(_iterables, detail::cont_begin_functor());
-        return ZipIterator<decltype(aux)>(aux);
-    }
-    
-    auto end() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::cont_end_functor()))>
-    {
-        auto aux = detail::tuple_map(_iterables, detail::cont_end_functor());
-        return ZipIterator<decltype(aux)>(aux);
-    }
-    
-    const iterable_tuple& iterables() const {return _iterables;}
-};
-
-template<typename... T>
-ContiguousArrayZip<T...> contiguous_array_zip(const Array<T>&... arr)
-{
-    auto arrays = std::make_tuple(arr...);
-    
-    // Check that arrays are contiguous.
-    detail::tuple_for_each(arrays, detail::forceContiguous());
-    
-    detail::common_shape cs;
-    detail::tuple_for_each(arrays, cs);
-    detail::tuple_for_each(arrays, detail::init_shape(cs._shape));
-    
-    return ContiguousArrayZip<T...>(arrays);
+    return ArrayZip<NDims, T...>(arrays);
 }
 
 }

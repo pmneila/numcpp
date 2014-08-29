@@ -12,17 +12,17 @@ protected:
     
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
-        : _core(array.core())
-        , _pointer(reinterpret_cast<unsigned char*>(_core.data() + _core.offset()))
+        : _shape(array.shape())
+        , _pointer(reinterpret_cast<unsigned char*>(array.data() + array.offset()))
         // , _outerAxes(_core.ndims())
-        , _seq_strides(seqStrides(_core.shape(), _core.strides()))
-        , _counter(_core.ndims(), 0)
+        , _seq_strides(seqStrides(_shape, array.strides()))
+        , _counter(array.ndims(), 0)
     {
         std::tie(_outerAxes, _innerStep, _innerSize) = array.getInnerLoopAxisAndStep();
         _innerEnd = _pointer + _innerSize;
         _pointerEnd = nullptr;
         
-        if(_core.numElements() == 0)
+        if(array.numElements() == 0)
             _pointer = _pointerEnd;
     }
     
@@ -37,7 +37,7 @@ public:
     typedef const T* const_pointer;
     
     Iterator(const Iterator& rhs)
-        : _core(rhs._core)
+        : _shape(rhs._shape)
         , _pointer(rhs._pointer)
         , _pointerEnd(rhs._pointerEnd)
         , _outerAxes(rhs._outerAxes)
@@ -50,7 +50,7 @@ public:
     
     Iterator& operator=(const Iterator& rhs)
     {
-        _core = rhs._core;
+        _shape = rhs._shape;
         _pointer = rhs._pointer;
         _pointerEnd = rhs._pointerEnd;
         _outerAxes = rhs._outerAxes;
@@ -59,6 +59,8 @@ public:
         _innerStep = rhs._innerStep;
         _innerSize = rhs._innerSize;
         _innerEnd = rhs._innerEnd;
+        
+        return *this;
     }
     
     Iterator& operator++()
@@ -76,7 +78,7 @@ public:
         for(i=_outerAxes; i>=0; --i)
         {
             _pointer += _seq_strides[i];
-            if(_counter[i] < _core.shape()[i] - 1)
+            if(_counter[i] < _shape[i] - 1)
             {
                 ++_counter[i];
                 break;
@@ -120,10 +122,11 @@ public:
     /// Undefined when the iterator is at end
     const Shape& counter() const {return _counter;}
     
-    std::ptrdiff_t offset() const {return _pointer - _core.data();}
+    // std::ptrdiff_t offset() const {return _pointer - _core->data();}
     
 private:
-    const ArrayCore& _core;
+    // const ArrayCore* _core;
+    Shape _shape;
     unsigned char* _pointer;
     unsigned char* _pointerEnd;
     
