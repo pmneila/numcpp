@@ -27,21 +27,21 @@ auto array_map(Function&& f, const Array<T>&... arr)
     constexpr int V = sizeof...(T);
     
     // If all arrays are contiguous, use contiguous iterators.
-    try
-    {
-        auto caz = contiguous_array_zip(arr..., Array<TR>());
-        for(auto el : caz)
-            std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
-        return std::get<V>(caz.iterables());
-    }
-    catch(...)
-    {
+    // try
+    // {
+    //     auto caz = contiguous_array_zip(arr..., Array<TR>());
+    //     for(auto el : caz)
+    //         std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
+    //     return std::get<V>(caz.iterables());
+    // }
+    // catch(...)
+    // {
         // Otherwise, use the more general, slower iterators.
         auto az = array_zip(arr..., Array<TR>());
         for(auto el : az)
             std::get<V>(el) = detail::call_func(f, el, detail::gen_seq<V>());
         return std::get<V>(az.iterables());
-    }
+    // }
 }
 
 template<typename T1, typename T2>

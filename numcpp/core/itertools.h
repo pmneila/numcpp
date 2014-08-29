@@ -326,10 +326,121 @@ namespace detail
                 throw std::invalid_argument("arrays in contiguous_array_zip must be contiguous");
         }
     };
+    
+    template<int NDims>
+    struct IndexArrayVector
+    {
+        const std::array<size_t, NDims>& _index;
+        
+        IndexArrayVector(const std::array<size_t, NDims>& index)
+            : _index(index)
+        {}
+        
+        template<typename T>
+        T& operator()(const Array<T>& arr)
+        {
+            return arr(_index[0], _index[1]);
+        }
+    };
+};
+
+template<int NDims, typename... T>
+class ArrayZipIterator
+{
+public:
+    typedef std::tuple<const Array<T>&...> array_tuple;
+    
+private:
+    array_tuple _arrays;
+    std::array<size_t, NDims> _shape;
+    std::array<size_t, NDims> _index;
+    
+public:
+    ArrayZipIterator(const array_tuple& arrays)
+        : _arrays(arrays)
+    {
+        const Shape& sh = std::get<0>(_arrays).shape();
+        for(int i = 0; i < NDims; ++i)
+        {
+            _shape[i] = sh[i];
+            _index[i] = 0;
+        }
+    }
+    
+    ArrayZipIterator(const ArrayZipIterator& rhs)
+        : _arrays(rhs._arrays)
+        , _shape(rhs._shape)
+        , _index(rhs._index)
+    {
+    }
+    
+    ArrayZipIterator& operator=(const ArrayZipIterator& rhs)
+    {
+        _arrays = rhs._arrays;
+        _shape = rhs._shape;
+        _index = rhs._index;
+        return *this;
+    }
+    
+    ArrayZipIterator& operator++()
+    {
+        int i = NDims - 1;
+        for(; i > 0; --i)
+        {
+            ++_index[i];
+            if(_index[i] >= _shape[i])
+                _index[i] = 0;
+            else
+                break;
+        }
+        
+        if(i==0)
+            ++_index[0];
+        
+        return *this;
+    }
+    
+    ArrayZipIterator& operator++(int)
+    {
+        ArrayZipIterator<T...> aux(*this);
+        ++(*this);
+        return *this;
+    }
+    
+    std::tuple<T&...> operator*()
+    {
+        return tuple_map_ref(_arrays, detail::IndexArrayVector<NDims>(_index));
+    }
+    
+    bool operator==(const ArrayZipIterator& rhs)
+    {
+        for(int i = 0; i < NDims; ++i)
+        {
+            if(_index[i] != rhs._index[i])
+                return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const ArrayZipIterator& rhs)
+    {
+        for(int i = 0; i < NDims; ++i)
+        {
+            if(_index[i] != rhs._index[i])
+                return true;
+        }
+        return false;
+    }
+    
+    void goToEnd()
+    {
+        _index = {0};
+        _index[0] = _shape[0];
+    }
 };
 
 // Similar to Zip, but ArrayZip holds the iterables, not just references.
-template<typename... T>
+template<int NDims, typename... T>
 class ArrayZip
 {
 public:
@@ -351,29 +462,31 @@ public:
         //detail::tuple_for_each(_iterables, detail::init_shape(shape));
     }
     
-    auto begin() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
+    ArrayZipIterator<NDims, T...> begin() // -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::begin_functor()))>
     {
-        auto aux = detail::tuple_map(_iterables, detail::begin_functor());
-        return ZipIterator<decltype(aux)>(aux);
+        return ArrayZipIterator<NDims, T...>(_iterables);
     }
     
-    auto end() -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::end_functor()))>
+    ArrayZipIterator<NDims, T...> end() // -> ZipIterator<decltype(detail::tuple_map(this->_iterables, detail::end_functor()))>
     {
-        auto aux = detail::tuple_map(_iterables, detail::end_functor());
-        return ZipIterator<decltype(aux)>(aux);
+        ArrayZipIterator<NDims, T...> it(_iterables);
+        
+        it.goToEnd();
+        
+        return it;
     }
     
     const iterable_tuple& iterables() const {return _iterables;}
 };
 
 template<typename... T>
-ArrayZip<T...> array_zip(const Array<T>&... arr)
+ArrayZip<2, T...> array_zip(const Array<T>&... arr)
 {
     Shape bshape = broadcastShapes({arr.shape()...});
     auto arrays = std::make_tuple(broadcast(arr, bshape)...);
     detail::tuple_for_each(arrays, detail::init_shape(bshape));
     
-    return ArrayZip<T...>(arrays);
+    return ArrayZip<2, T...>(arrays);
 }
 
 template<typename... T>

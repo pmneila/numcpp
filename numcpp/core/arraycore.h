@@ -58,10 +58,10 @@ public:
     
     std::ptrdiff_t offset(const std::vector<size_t>& index) const
     {
+        #ifndef NDEBUG
         if(index.size() != _strides.size())
             throw std::invalid_argument("index has an invalid number of dimensions");
         
-        #ifndef NDEBUG
         auto shape_it = shape().begin();
         auto shape_it_end = shape().end();
         auto index_it = index.begin();
@@ -69,7 +69,7 @@ public:
             assert((*index_it>=0 && *index_it < *shape_it) && "index out of range");
         #endif
         
-        return _offset + std::inner_product(index.begin(), index.end(), _strides.begin(), 0);
+        return std::inner_product(index.begin(), index.end(), _strides.begin(), _offset);
     }
     
     template<int Index=0, typename... Is>
