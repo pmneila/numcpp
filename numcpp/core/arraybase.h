@@ -177,6 +177,7 @@ public:
     int ndims() const {return _core.ndims();}
     Manager::Ptr manager() const {return _core.manager();}
     bool isNull() const {return _core.isNull();}
+    size_t length() const {return _core.ndims() > 0 ? _core.shape()[0] : 0 ;}
     
     DT* data() const {return reinterpret_cast<DT*>(_data);}
     std::ptrdiff_t offset() const {return _core.offset();}

@@ -361,8 +361,7 @@ public:
         : _arrays(rhs._arrays)
         , _shape(rhs._shape)
         , _index(rhs._index)
-    {
-    }
+    {}
     
     ArrayZipIterator& operator=(const ArrayZipIterator& rhs)
     {
@@ -378,10 +377,10 @@ public:
         for(; i > 0; --i)
         {
             ++_index[i];
-            if(_index[i] >= _shape[i])
-                _index[i] = 0;
-            else
+            if(_index[i] < _shape[i])
                 break;
+            
+            _index[i] = 0;
         }
         
         if(i==0)
@@ -429,101 +428,6 @@ public:
     }
 };
 
-// template<typename... T>
-// class ArrayZipIterator<-1, T...>
-// {
-// public:
-//     typedef std::tuple<const Array<T>&...> array_tuple;
-    
-// private:
-//     array_tuple _arrays;
-//     Shape _shape;
-//     int _ndims;
-//     Shape _index;
-    
-// public:
-//     ArrayZipIterator(const array_tuple& arrays)
-//         : _arrays(arrays)
-//         , _shape(std::get<0>(_arrays).shape())
-//         , _ndims(_shape.size())
-//         , _index(_ndims, 0)
-//     {
-//     }
-    
-//     ArrayZipIterator(const ArrayZipIterator& rhs)
-//         : _arrays(rhs._arrays)
-//         , _shape(rhs._shape)
-//         , _ndims(rhs._ndims)
-//         , _index(rhs._index)
-//     {
-//     }
-    
-//     ArrayZipIterator& operator=(const ArrayZipIterator& rhs)
-//     {
-//         _arrays = rhs._arrays;
-//         _shape = rhs._shape;
-//         _ndims = rhs._ndims;
-//         _index = rhs._index;
-//         return *this;
-//     }
-    
-//     ArrayZipIterator& operator++()
-//     {
-//         int i = _ndims - 1;
-//         for(; i > 0; --i)
-//         {
-//             ++_index[i];
-//             if(_index[i] >= _shape[i])
-//                 _index[i] = 0;
-//             else
-//                 break;
-//         }
-        
-//         if(i==0)
-//             ++_index[0];
-        
-//         return *this;
-//     }
-    
-//     ArrayZipIterator& operator++(int)
-//     {
-//         ArrayZipIterator<T...> aux(*this);
-//         ++(*this);
-//         return *this;
-//     }
-    
-//     std::tuple<T&...> operator*()
-//     {
-//         return tuple_map_ref(_arrays, detail::IndexArrayWithVector(_index));
-//     }
-    
-//     bool operator==(const ArrayZipIterator& rhs)
-//     {
-//         for(int i = 0; i < _ndims; ++i)
-//         {
-//             if(_index[i] != rhs._index[i])
-//                 return false;
-//         }
-//         return true;
-//     }
-
-//     bool operator!=(const ArrayZipIterator& rhs)
-//     {
-//         for(int i = 0; i < _ndims; ++i)
-//         {
-//             if(_index[i] != rhs._index[i])
-//                 return true;
-//         }
-//         return false;
-//     }
-    
-//     void goToEnd()
-//     {
-//         std::fill(_index.begin(), _index.end(), 0);
-//         _index[0] = _shape[0];
-//     }
-// };
-
 // General ArrayZipIterator for any number of dimensions
 template<typename... T>
 class ArrayZipIterator<-1, T...> : public ZipIterator<std::tuple<typename Array<T>::iterator...>>
@@ -561,8 +465,7 @@ protected:
 public:
     ArrayZip(const Array<T>&... arrays)
         : _arrays(arrays...)
-    {
-    }
+    {}
     
     ArrayZip(const std::tuple<Array<T>...>& arrays)
         : _arrays(arrays)
