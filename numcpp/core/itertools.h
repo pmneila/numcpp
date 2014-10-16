@@ -4,6 +4,7 @@
 
 #include <tuple>
 #include <type_traits>
+#include <array>
 
 #include "ostream.h"
 
@@ -334,7 +335,7 @@ namespace detail
     };
 };
 
-template<size_t NDims, typename... T>
+template<int NDims, typename... T>
 class ArrayZipIterator
 {
 public:
@@ -391,7 +392,7 @@ public:
     
     ArrayZipIterator& operator++(int)
     {
-        ArrayZipIterator<T...> aux(*this);
+        ArrayZipIterator<NDims, T...> aux(*this);
         ++(*this);
         return *this;
     }
@@ -423,7 +424,7 @@ public:
     
     void goToEnd()
     {
-        _index = {0};
+        _index = {{0}};
         _index[0] = _shape[0];
     }
 };
@@ -453,7 +454,7 @@ public:
 };
 
 // Similar to Zip, but ArrayZip holds the iterables, not just references.
-template<size_t NDims, typename... T>
+template<int NDims, typename... T>
 class ArrayZip
 {
 public:
@@ -487,7 +488,7 @@ public:
     const array_tuple& arrays() const {return _arrays;}
 };
 
-template<size_t NDims=-1, typename... T>
+template<int NDims=-1, typename... T>
 ArrayZip<NDims, T...> array_zip(const Array<T>&... arr)
 {
     Shape bshape = broadcastShapes({arr.shape()...});

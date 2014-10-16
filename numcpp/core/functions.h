@@ -133,10 +133,25 @@ Array<bool> operator!=(const Array<T1>& arr1, const Array<T2>& arr2)
     return array_map([](const T1& a, const T2& b){return a!=b;}, arr1, arr2);
 }
 
+namespace detail
+{
+    template<typename Tout, typename Tin>
+    Array<Tout> cast(const Array<Tin>& in, std::false_type)
+    {
+        return array_map([](const Tin& a){return static_cast<Tout>(a);}, in);
+    }
+
+    template<typename T>
+    Array<T> cast(const Array<T>& in, std::true_type)
+    {
+        return in;
+    }
+}
+
 template<typename Tout, typename Tin>
 Array<Tout> cast(const Array<Tin>& in)
 {
-    return array_map([](const Tin& a){return static_cast<Tout>(a);}, in);
+    return detail::cast<Tout>(in, std::is_same<Tout,Tin>());
 }
 
 #define VECTORIZE(vectorizedname, name) \
@@ -194,7 +209,7 @@ VECTORIZE(isfinite, std::isfinite)
 template<typename T>
 T sum(const Array<T>& arr)
 {
-    return std::accumulate(arr.begin(), arr.end(), 0);
+    return std::accumulate(arr.begin(), arr.end(), T(0));
 }
 
 template<typename T>

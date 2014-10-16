@@ -13,7 +13,7 @@ protected:
     template<typename Derived>
     Iterator(const ArrayBase<T, Derived>& array)
         : _shape(array.shape())
-        , _pointer(reinterpret_cast<unsigned char*>(array.data() + array.offset()))
+        , _pointer(reinterpret_cast<unsigned char*>(array.data()) + array.offset())
         // , _outerAxes(_core.ndims())
         , _seq_strides(seqStrides(_shape, array.strides()))
         , _counter(array.ndims(), 0)

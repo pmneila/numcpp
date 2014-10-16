@@ -87,7 +87,7 @@ public:
     std::ptrdiff_t offset(const std::array<size_t, NDims>& index) const
     {
         #ifndef NDEBUG
-        if(Index > ndims())
+        if(index > ndims())
             throw std::invalid_argument("array indexed with too many indices");
         #endif
         
